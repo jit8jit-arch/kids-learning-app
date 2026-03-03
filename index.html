@@ -3,48 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kids Letter Tracer</title>
+    <title>Kids Learning App</title>
     <link rel="manifest" href="manifest.json">
     <style>
+        :root {
+            --primary: #FF9F1C;
+            --secondary: #2EC4B6;
+            --bg: #FDFFFC;
+            --text: #011627;
+        }
         body {
             margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            color: var(--text);
             overflow: hidden;
-            background-color: #f0f8ff;
+            touch-action: none;
+        }
+        /* Menu Screen */
+        #menu-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-family: 'Comic Sans MS', sans-serif;
-            touch-action: none; /* Prevents screen scrolling while drawing */
+            height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
         }
-        #ui-bar {
+        h1 { color: var(--primary); text-align: center; font-size: 32px; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .btn-group {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 20px 10px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #1B998B;
+            cursor: pointer;
+        }
+        .btn-group:active { transform: translateY(4px); box-shadow: none; }
+        
+        /* Game Screen */
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+        }
+        #header {
             width: 100%;
             padding: 15px;
-            background: #4A90E2;
+            background: var(--primary);
             color: white;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
             font-size: 24px;
             font-weight: bold;
         }
+        #back-btn {
+            background: rgba(255,255,255,0.3);
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-family: inherit;
+        }
         canvas {
+            margin-top: 20px;
             background-color: white;
             border-radius: 20px;
-            margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-width: 90%;
+        }
+        #message {
+            margin-top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #E71D36;
+            height: 40px;
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-bar">Draw the letter: <span id="currentLetter">A</span></div>
-    
-    <canvas id="drawingCanvas"></canvas>
+    <div id="menu-screen">
+        <h1>Learn to Write!</h1>
+        <div class="grid" id="category-grid">
+            </div>
+    </div>
+
+    <div id="game-screen">
+        <div id="header">
+            <button id="back-btn" onclick="showMenu()">Back</button>
+            <span id="group-title">A-E</span>
+            <div style="width: 60px;"></div> </div>
+        <canvas id="drawingCanvas"></canvas>
+        <div id="message"></div>
+    </div>
 
     <script src="app.js"></script>
     <script>
-        // Register the Service Worker for offline use
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-            .then(() => console.log("Service Worker Registered"));
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </body>
