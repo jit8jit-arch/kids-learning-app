@@ -8,9 +8,21 @@ const ctx = canvas.getContext('2d');
 let completedSections = JSON.parse(localStorage.getItem('completed')) || {};
 let animationFrameId;
 
-// --- TRACING DATA ---
+// --- TRACING DATA (Letters & Numbers 1-10) ---
 const traceData = {
     '1': [ [ {x: 0, y: -100}, {x: 0, y: 100} ] ],
+    '2': [ [ {x: -40, y: -80}, {x: 0, y: -100}, {x: 40, y: -80}, {x: 40, y: -20}, {x: -40, y: 100}, {x: 40, y: 100} ] ],
+    '3': [ [ {x: -40, y: -80}, {x: 0, y: -100}, {x: 40, y: -80}, {x: 40, y: -20}, {x: 0, y: 0} ], [ {x: 0, y: 0}, {x: 40, y: 20}, {x: 40, y: 80}, {x: 0, y: 100}, {x: -40, y: 80} ] ],
+    '4': [ [ {x: -20, y: -100}, {x: -40, y: 20}, {x: 40, y: 20} ], [ {x: 20, y: -50}, {x: 20, y: 100} ] ],
+    '5': [ [ {x: -20, y: -100}, {x: -20, y: 0}, {x: 30, y: 0}, {x: 40, y: 40}, {x: 0, y: 100}, {x: -40, y: 80} ], [ {x: -20, y: -100}, {x: 40, y: -100} ] ],
+    '6': [ [ {x: 40, y: -100}, {x: -40, y: 0}, {x: -40, y: 60}, {x: 0, y: 100}, {x: 40, y: 50}, {x: 0, y: 0}, {x: -40, y: 30} ] ],
+    '7': [ [ {x: -40, y: -100}, {x: 40, y: -100}, {x: -20, y: 100} ] ],
+    '8': [ [ {x: 0, y: -100}, {x: -40, y: -50}, {x: 0, y: 0}, {x: 40, y: 50}, {x: 0, y: 100}, {x: -40, y: 50}, {x: 0, y: 0}, {x: 40, y: -50}, {x: 0, y: -100} ] ],
+    '9': [ [ {x: 40, y: -50}, {x: 0, y: -100}, {x: -40, y: -50}, {x: 0, y: 0}, {x: 40, y: -50}, {x: 40, y: 100} ] ],
+    '10': [
+        [ {x: -40, y: -100}, {x: -40, y: 100} ], // The 1
+        [ {x: 40, y: -100}, {x: 10, y: -50}, {x: 10, y: 50}, {x: 40, y: 100}, {x: 70, y: 50}, {x: 70, y: -50}, {x: 40, y: -100} ] // The 0
+    ],
     'A': [
         [ {x: 0, y: -100}, {x: -60, y: 100} ], 
         [ {x: 0, y: -100}, {x: 60, y: 100} ],  
@@ -40,7 +52,8 @@ const traceData = {
 };
 
 const menuItems = [
-    { type: 'trace', title: 'Numbers (1)', items: ['1'] },
+    { type: 'trace', title: 'Numbers 1 - 5', items: ['1', '2', '3', '4', '5'] },
+    { type: 'trace', title: 'Numbers 6 - 10', items: ['6', '7', '8', '9', '10'] },
     { type: 'trace', title: 'Letters A - E', items: ['A', 'B', 'C', 'D', 'E'] },
     { type: 'trace', title: 'Letters F - G', items: ['F', 'G'] },
     { type: 'sort', title: 'Puzzle: Animals vs Fruits' }
@@ -48,10 +61,11 @@ const menuItems = [
 
 let currentGroup = null;
 let currentItemIndex = 0;
-let smoothStrokes = []; // Will hold the mathematically interpolated dots
+let smoothStrokes = []; 
 let currentStrokeIndex = 0;
 let currentWaypointIndex = 0;
 let drawnPaths = []; 
+let isLetterFinished = false; // New variable to track completion
 
 // --- MENU LOGIC ---
 function buildMenu() {
@@ -95,8 +109,7 @@ function speak(text) {
     speechSynthesis.speak(utterance);
 }
 
-// --- WAYPOINT INTERPOLATOR (The Magic for Smooth Lines) ---
-// This takes corner points and generates many small dots between them
+// --- WAYPOINT INTERPOLATOR ---
 function interpolateStrokes(rawStrokes) {
     let generated = [];
     rawStrokes.forEach(stroke => {
@@ -105,7 +118,7 @@ function interpolateStrokes(rawStrokes) {
             let p1 = stroke[i];
             let p2 = stroke[i+1];
             let dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-            let steps = Math.max(Math.floor(dist / 25), 1); // Place a dot every 25 pixels
+            let steps = Math.max(Math.floor(dist / 25), 1); 
             for(let j = 0; j < steps; j++) {
                 newStroke.push({
                     x: p1.x + (p2.x - p1.x) * (j/steps),
@@ -113,7 +126,7 @@ function interpolateStrokes(rawStrokes) {
                 });
             }
         }
-        newStroke.push(stroke[stroke.length - 1]); // Add final point
+        newStroke.push(stroke[stroke.length - 1]); 
         generated.push(newStroke);
     });
     return generated;
@@ -125,7 +138,6 @@ function startTracing() {
     tracingScreen.classList.add('active-screen');
     document.getElementById('tracing-title').innerText = currentGroup.title;
     
-    // Resize canvas based on container
     let container = document.querySelector('.canvas-container');
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
@@ -138,6 +150,7 @@ function loadLetter() {
     currentStrokeIndex = 0;
     currentWaypointIndex = 0;
     drawnPaths = [];
+    isLetterFinished = false; // Reset completion state
     document.getElementById('tracing-msg').innerText = "Trace the line!";
     
     const char = currentGroup.items[currentItemIndex];
@@ -145,14 +158,16 @@ function loadLetter() {
         smoothStrokes = interpolateStrokes(traceData[char]);
     }
     
-    animateCanvas(); // Start 60fps loop
+    animateCanvas(); 
 }
 
 function animateCanvas() {
+    if (isLetterFinished) return; // Stop animation loop if the letter is done
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const char = currentGroup.items[currentItemIndex];
     
-    // 1. Draw Beautiful Background Letter
+    // 1. Draw Background Outline Letter
     ctx.font = `bold ${canvas.height * 0.7}px 'Comic Sans MS'`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -178,17 +193,15 @@ function animateCanvas() {
     if (currentStrokeIndex < smoothStrokes.length) {
         let activeStroke = smoothStrokes[currentStrokeIndex];
         
-        // Draw the remaining small dots to guide the way
         for(let i = currentWaypointIndex; i < activeStroke.length; i++) {
             ctx.beginPath();
             ctx.arc(activeStroke[i].x + canvas.width/2, activeStroke[i].y + canvas.height/2, 8, 0, Math.PI*2);
-            ctx.fillStyle = "#FFCA3A"; // Yellow breadcrumbs
+            ctx.fillStyle = "#FFCA3A"; 
             ctx.fill();
         }
 
-        // Draw the Pulsing Target Dot!
         let targetWP = activeStroke[currentWaypointIndex];
-        let pulse = Math.sin(Date.now() / 150) * 5; // Creates a breathing effect
+        let pulse = Math.sin(Date.now() / 150) * 5; 
         
         ctx.beginPath();
         ctx.arc(targetWP.x + canvas.width/2, targetWP.y + canvas.height/2, 20 + pulse, 0, Math.PI*2);
@@ -209,7 +222,7 @@ canvas.addEventListener('touchmove', (e) => { if(!isDragging) return; e.preventD
 canvas.addEventListener('touchend', () => isDragging = false);
 
 function checkWaypoint(touch) {
-    if (currentStrokeIndex >= smoothStrokes.length) return;
+    if (currentStrokeIndex >= smoothStrokes.length || isLetterFinished) return;
 
     let rect = canvas.getBoundingClientRect();
     let touchX = touch.clientX - rect.left - canvas.width/2;
@@ -218,7 +231,7 @@ function checkWaypoint(touch) {
     let targetWP = smoothStrokes[currentStrokeIndex][currentWaypointIndex];
     let dist = Math.sqrt(Math.pow(touchX - targetWP.x, 2) + Math.pow(touchY - targetWP.y, 2));
     
-    if (dist < 45) { // Hitbox size
+    if (dist < 45) { 
         currentWaypointIndex++;
         
         if (currentWaypointIndex >= smoothStrokes[currentStrokeIndex].length) {
@@ -234,7 +247,17 @@ function checkWaypoint(touch) {
 }
 
 function letterCompleted(char) {
-    cancelAnimationFrame(animationFrameId);
+    isLetterFinished = true; // Mark as finished
+    cancelAnimationFrame(animationFrameId); // Stop the tracing animation
+    
+    // Immediately draw the perfectly solid colored letter!
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = `bold ${canvas.height * 0.7}px 'Comic Sans MS'`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#087E8B"; // Premium solid teal color
+    ctx.fillText(char, canvas.width/2, canvas.height/2);
+
     playSuccess();
     speak(char);
     document.getElementById('tracing-msg').innerText = "Perfect! 🎉";
@@ -275,7 +298,7 @@ function startSorting() {
         el.dataset.type = item.type;
         el.style.left = (Math.random() * 60 + 10) + '%';
         el.style.top = (Math.random() * 30 + 50) + '%';
-        el.style.animationDelay = (Math.random() * 2) + 's'; // Stagger the floating
+        el.style.animationDelay = (Math.random() * 2) + 's'; 
         
         el.addEventListener('touchstart', (e) => { el.style.transform = "scale(1.3)"; el.style.animation = "none"; });
         el.addEventListener('touchmove', (e) => {
@@ -304,7 +327,6 @@ function checkDrop(el, touch) {
         speak(targetType === 'fruit' ? 'Yummy!' : 'Yay!');
         el.style.pointerEvents = 'none';
         
-        // Snap to center of basket
         let targetZone = targetType === 'fruit' ? fruitsZone : animalsZone;
         el.style.left = (targetZone.left + targetZone.width/2 - 30) + 'px';
         el.style.top = (targetZone.top + targetZone.height/2 - 30) + 'px';
@@ -320,7 +342,7 @@ function checkDrop(el, touch) {
         }
     } else {
         speak('Try again!');
-        el.style.animation = "float 3s ease-in-out infinite"; // Restart float
+        el.style.animation = "float 3s ease-in-out infinite"; 
     }
 }
 
