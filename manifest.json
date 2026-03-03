@@ -1,10 +1,11 @@
 {
-  "name": "Kids Letter Tracer",
-  "short_name": "Tracer",
-  "start_url": "/index.html",
+  "name": "Kids Learning World",
+  "short_name": "KidsApp",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#FDFFFC",
-  "theme_color": "#FF9F1C",
+  "background_color": "#F4F1DE",
+  "theme_color": "#087E8B",
   "orientation": "portrait",
   "icons": [
     {
