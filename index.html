@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kids Letter Tracer</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Comic Sans MS', sans-serif;
+            touch-action: none; /* Prevents screen scrolling while drawing */
+        }
+        #ui-bar {
+            width: 100%;
+            padding: 15px;
+            background: #4A90E2;
+            color: white;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        canvas {
+            background-color: white;
+            border-radius: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ui-bar">Draw the letter: <span id="currentLetter">A</span></div>
+    
+    <canvas id="drawingCanvas"></canvas>
+
+    <script src="app.js"></script>
+    <script>
+        // Register the Service Worker for offline use
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+            .then(() => console.log("Service Worker Registered"));
+        }
+    </script>
+</body>
+</html>
