@@ -8,7 +8,7 @@ const ctx = canvas.getContext('2d');
 let completedSections = JSON.parse(localStorage.getItem('completed')) || {};
 let animationFrameId;
 
-// --- TRACING DATA (Letters & Numbers 1-10) ---
+// --- TRACING DATA ---
 const traceData = {
     '1': [ [ {x: 0, y: -100}, {x: 0, y: 100} ] ],
     '2': [ [ {x: -40, y: -80}, {x: 0, y: -100}, {x: 40, y: -80}, {x: 40, y: -20}, {x: -40, y: 100}, {x: 40, y: 100} ] ],
@@ -19,36 +19,14 @@ const traceData = {
     '7': [ [ {x: -40, y: -100}, {x: 40, y: -100}, {x: -20, y: 100} ] ],
     '8': [ [ {x: 0, y: -100}, {x: -40, y: -50}, {x: 0, y: 0}, {x: 40, y: 50}, {x: 0, y: 100}, {x: -40, y: 50}, {x: 0, y: 0}, {x: 40, y: -50}, {x: 0, y: -100} ] ],
     '9': [ [ {x: 40, y: -50}, {x: 0, y: -100}, {x: -40, y: -50}, {x: 0, y: 0}, {x: 40, y: -50}, {x: 40, y: 100} ] ],
-    '10': [
-        [ {x: -40, y: -100}, {x: -40, y: 100} ], // The 1
-        [ {x: 40, y: -100}, {x: 10, y: -50}, {x: 10, y: 50}, {x: 40, y: 100}, {x: 70, y: 50}, {x: 70, y: -50}, {x: 40, y: -100} ] // The 0
-    ],
-    'A': [
-        [ {x: 0, y: -100}, {x: -60, y: 100} ], 
-        [ {x: 0, y: -100}, {x: 60, y: 100} ],  
-        [ {x: -30, y: 20}, {x: 30, y: 20} ]    
-    ],
-    'B': [
-        [ {x: -40, y: -100}, {x: -40, y: 100} ], 
-        [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 40, y: -50}, {x: 20, y: 0}, {x: -40, y: 0} ], 
-        [ {x: -40, y: 0}, {x: 30, y: 0}, {x: 50, y: 50}, {x: 30, y: 100}, {x: -40, y: 100} ]  
-    ],
+    '10': [ [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: 40, y: -100}, {x: 10, y: -50}, {x: 10, y: 50}, {x: 40, y: 100}, {x: 70, y: 50}, {x: 70, y: -50}, {x: 40, y: -100} ] ],
+    'A': [ [ {x: 0, y: -100}, {x: -60, y: 100} ], [ {x: 0, y: -100}, {x: 60, y: 100} ], [ {x: -30, y: 20}, {x: 30, y: 20} ] ],
+    'B': [ [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 40, y: -50}, {x: 20, y: 0}, {x: -40, y: 0} ], [ {x: -40, y: 0}, {x: 30, y: 0}, {x: 50, y: 50}, {x: 30, y: 100}, {x: -40, y: 100} ] ],
     'C': [ [ {x: 40, y: -80}, {x: 0, y: -100}, {x: -40, y: -50}, {x: -40, y: 50}, {x: 0, y: 100}, {x: 40, y: 80} ] ],
-    'D': [
-        [ {x: -40, y: -100}, {x: -40, y: 100} ], 
-        [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 50, y: -50}, {x: 50, y: 50}, {x: 20, y: 100}, {x: -40, y: 100} ] 
-    ],
-    'E': [
-        [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 30, y: -100} ], 
-        [ {x: -40, y: 0}, {x: 20, y: 0} ], [ {x: -40, y: 100}, {x: 30, y: 100} ]    
-    ],
-    'F': [
-        [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 30, y: -100} ], [ {x: -40, y: 0}, {x: 20, y: 0} ]        
-    ],
-    'G': [
-        [ {x: 40, y: -80}, {x: 0, y: -100}, {x: -40, y: -50}, {x: -40, y: 50}, {x: 0, y: 100}, {x: 40, y: 50}, {x: 40, y: 0} ],
-        [ {x: 40, y: 0}, {x: 10, y: 0} ]
-    ]
+    'D': [ [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 50, y: -50}, {x: 50, y: 50}, {x: 20, y: 100}, {x: -40, y: 100} ] ],
+    'E': [ [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 30, y: -100} ], [ {x: -40, y: 0}, {x: 20, y: 0} ], [ {x: -40, y: 100}, {x: 30, y: 100} ] ],
+    'F': [ [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 30, y: -100} ], [ {x: -40, y: 0}, {x: 20, y: 0} ] ],
+    'G': [ [ {x: 40, y: -80}, {x: 0, y: -100}, {x: -40, y: -50}, {x: -40, y: 50}, {x: 0, y: 100}, {x: 40, y: 50}, {x: 40, y: 0} ], [ {x: 40, y: 0}, {x: 10, y: 0} ] ]
 };
 
 const menuItems = [
@@ -56,7 +34,7 @@ const menuItems = [
     { type: 'trace', title: 'Numbers 6 - 10', items: ['6', '7', '8', '9', '10'] },
     { type: 'trace', title: 'Letters A - E', items: ['A', 'B', 'C', 'D', 'E'] },
     { type: 'trace', title: 'Letters F - G', items: ['F', 'G'] },
-    { type: 'sort', title: 'Puzzle: Animals vs Fruits' }
+    { type: 'sort', title: 'Fun Puzzle: Animals & Fruits' }
 ];
 
 let currentGroup = null;
@@ -65,13 +43,13 @@ let smoothStrokes = [];
 let currentStrokeIndex = 0;
 let currentWaypointIndex = 0;
 let drawnPaths = []; 
-let isLetterFinished = false; // New variable to track completion
+let isLetterFinished = false;
 
 // --- MENU LOGIC ---
 function buildMenu() {
     const grid = document.getElementById('menu-grid');
     grid.innerHTML = '';
-    menuItems.forEach((item, index) => {
+    menuItems.forEach((item) => {
         let btn = document.createElement('button');
         btn.className = 'menu-btn';
         let isDone = completedSections[item.title] ? '<span class="finished-badge">✔ Done</span>' : '';
@@ -109,7 +87,7 @@ function speak(text) {
     speechSynthesis.speak(utterance);
 }
 
-// --- WAYPOINT INTERPOLATOR ---
+// --- WAYPOINT INTERPOLATOR (Tracing) ---
 function interpolateStrokes(rawStrokes) {
     let generated = [];
     rawStrokes.forEach(stroke => {
@@ -120,10 +98,7 @@ function interpolateStrokes(rawStrokes) {
             let dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
             let steps = Math.max(Math.floor(dist / 25), 1); 
             for(let j = 0; j < steps; j++) {
-                newStroke.push({
-                    x: p1.x + (p2.x - p1.x) * (j/steps),
-                    y: p1.y + (p2.y - p1.y) * (j/steps)
-                });
+                newStroke.push({ x: p1.x + (p2.x - p1.x) * (j/steps), y: p1.y + (p2.y - p1.y) * (j/steps) });
             }
         }
         newStroke.push(stroke[stroke.length - 1]); 
@@ -150,24 +125,20 @@ function loadLetter() {
     currentStrokeIndex = 0;
     currentWaypointIndex = 0;
     drawnPaths = [];
-    isLetterFinished = false; // Reset completion state
+    isLetterFinished = false;
     document.getElementById('tracing-msg').innerText = "Trace the line!";
     
     const char = currentGroup.items[currentItemIndex];
-    if (traceData[char]) {
-        smoothStrokes = interpolateStrokes(traceData[char]);
-    }
-    
+    if (traceData[char]) smoothStrokes = interpolateStrokes(traceData[char]);
     animateCanvas(); 
 }
 
 function animateCanvas() {
-    if (isLetterFinished) return; // Stop animation loop if the letter is done
+    if (isLetterFinished) return; 
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const char = currentGroup.items[currentItemIndex];
     
-    // 1. Draw Background Outline Letter
     ctx.font = `bold ${canvas.height * 0.7}px 'Comic Sans MS'`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -179,7 +150,6 @@ function animateCanvas() {
 
     if (smoothStrokes.length === 0) return;
 
-    // 2. Draw Finished Strokes
     ctx.strokeStyle = "#087E8B";
     ctx.lineWidth = 30;
     drawnPaths.forEach(path => {
@@ -189,7 +159,6 @@ function animateCanvas() {
         ctx.stroke();
     });
 
-    // 3. Draw Active Path & Waypoints
     if (currentStrokeIndex < smoothStrokes.length) {
         let activeStroke = smoothStrokes[currentStrokeIndex];
         
@@ -211,11 +180,10 @@ function animateCanvas() {
         ctx.strokeStyle = "white";
         ctx.stroke();
     }
-    
     animationFrameId = requestAnimationFrame(animateCanvas);
 }
 
-// Touch Handling
+// Touch Handling (Tracing)
 let isDragging = false;
 canvas.addEventListener('touchstart', (e) => { isDragging = true; checkWaypoint(e.touches[0]); });
 canvas.addEventListener('touchmove', (e) => { if(!isDragging) return; e.preventDefault(); checkWaypoint(e.touches[0]); });
@@ -223,7 +191,6 @@ canvas.addEventListener('touchend', () => isDragging = false);
 
 function checkWaypoint(touch) {
     if (currentStrokeIndex >= smoothStrokes.length || isLetterFinished) return;
-
     let rect = canvas.getBoundingClientRect();
     let touchX = touch.clientX - rect.left - canvas.width/2;
     let touchY = touch.clientY - rect.top - canvas.height/2;
@@ -233,29 +200,24 @@ function checkWaypoint(touch) {
     
     if (dist < 45) { 
         currentWaypointIndex++;
-        
         if (currentWaypointIndex >= smoothStrokes[currentStrokeIndex].length) {
             drawnPaths.push(smoothStrokes[currentStrokeIndex]);
             currentStrokeIndex++;
             currentWaypointIndex = 0;
-            
-            if (currentStrokeIndex >= smoothStrokes.length) {
-                letterCompleted(currentGroup.items[currentItemIndex]);
-            }
+            if (currentStrokeIndex >= smoothStrokes.length) letterCompleted(currentGroup.items[currentItemIndex]);
         }
     }
 }
 
 function letterCompleted(char) {
-    isLetterFinished = true; // Mark as finished
-    cancelAnimationFrame(animationFrameId); // Stop the tracing animation
+    isLetterFinished = true; 
+    cancelAnimationFrame(animationFrameId); 
     
-    // Immediately draw the perfectly solid colored letter!
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.font = `bold ${canvas.height * 0.7}px 'Comic Sans MS'`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#087E8B"; // Premium solid teal color
+    ctx.fillStyle = "#087E8B"; 
     ctx.fillText(char, canvas.width/2, canvas.height/2);
 
     playSuccess();
@@ -274,13 +236,19 @@ function letterCompleted(char) {
     }, 2000);
 }
 
-// --- PUZZLE LOGIC ---
-const sortingItems = [
-    { emoji: '🍎', type: 'fruit' }, { emoji: '🍇', type: 'fruit' }, { emoji: '🍓', type: 'fruit' },
-    { emoji: '🐶', type: 'animal' }, { emoji: '🐱', type: 'animal' }, { emoji: '🐸', type: 'animal' }
+// --- MEGA PUZZLE LOGIC ---
+// Expanded Master Pool of Items
+const fullPuzzlePool = [
+    { emoji: '🍎', type: 'fruit' }, { emoji: '🍌', type: 'fruit' }, { emoji: '🍇', type: 'fruit' },
+    { emoji: '🍓', type: 'fruit' }, { emoji: '🍉', type: 'fruit' }, { emoji: '🍒', type: 'fruit' },
+    { emoji: '🍍', type: 'fruit' }, { emoji: '🥭', type: 'fruit' }, { emoji: '🥝', type: 'fruit' },
+    { emoji: '🐶', type: 'animal' }, { emoji: '🐱', type: 'animal' }, { emoji: '🐸', type: 'animal' },
+    { emoji: '🦁', type: 'animal' }, { emoji: '🐼', type: 'animal' }, { emoji: '🐷', type: 'animal' },
+    { emoji: '🐯', type: 'animal' }, { emoji: '🦊', type: 'animal' }, { emoji: '🐵', type: 'animal' }
 ];
 
 let itemsPlaced = 0;
+let totalItemsThisRound = 8; // We will randomly pick 8 items each game
 
 function startSorting() {
     menuScreen.classList.remove('active-screen');
@@ -291,26 +259,41 @@ function startSorting() {
     document.querySelectorAll('.draggable').forEach(el => el.remove());
     itemsPlaced = 0;
 
-    sortingItems.forEach((item) => {
+    // Shuffle the master pool and pick the first 8
+    let shuffledPool = fullPuzzlePool.sort(() => 0.5 - Math.random());
+    let activeItems = shuffledPool.slice(0, totalItemsThisRound);
+
+    activeItems.forEach((item, index) => {
         let el = document.createElement('div');
         el.className = 'draggable';
         el.innerText = item.emoji;
         el.dataset.type = item.type;
-        el.style.left = (Math.random() * 60 + 10) + '%';
-        el.style.top = (Math.random() * 30 + 50) + '%';
-        el.style.animationDelay = (Math.random() * 2) + 's'; 
         
-        el.addEventListener('touchstart', (e) => { el.style.transform = "scale(1.3)"; el.style.animation = "none"; });
+        // Spread them out randomly in the lower section
+        el.style.left = (Math.random() * 70 + 10) + '%';
+        el.style.top = (Math.random() * 40 + 45) + '%';
+        // Stagger the pop-in animation slightly for each item
+        el.style.animationDelay = `0.${index}s, ${Math.random()}s`; 
+        
+        el.addEventListener('touchstart', (e) => { 
+            el.style.transform = "scale(1.4)"; 
+            el.style.animation = "none"; // Stop floating when grabbed
+            el.style.zIndex = "100"; // Bring to front
+        });
+        
         el.addEventListener('touchmove', (e) => {
             e.preventDefault();
             let touch = e.touches[0];
-            el.style.left = (touch.clientX - 35) + 'px';
+            el.style.left = (touch.clientX - 40) + 'px';
             el.style.top = (touch.clientY - 120) + 'px';
         });
+        
         el.addEventListener('touchend', (e) => {
             el.style.transform = "scale(1)";
+            el.style.zIndex = "1";
             checkDrop(el, e.changedTouches[0]);
         });
+        
         area.appendChild(el);
     });
 }
@@ -324,24 +307,29 @@ function checkDrop(el, touch) {
     let droppedInAnimals = touch.clientX > animalsZone.left && touch.clientX < animalsZone.right && touch.clientY > animalsZone.top && touch.clientY < animalsZone.bottom;
 
     if ((targetType === 'fruit' && droppedInFruits) || (targetType === 'animal' && droppedInAnimals)) {
-        speak(targetType === 'fruit' ? 'Yummy!' : 'Yay!');
-        el.style.pointerEvents = 'none';
+        speak(targetType === 'fruit' ? 'Yummy!' : 'Wow!');
+        el.style.pointerEvents = 'none'; // Lock it
         
+        // Add the golden pulse success animation!
+        el.classList.add('success-pulse');
+        
+        // Snap near center of the basket randomly so they pile up nicely
         let targetZone = targetType === 'fruit' ? fruitsZone : animalsZone;
-        el.style.left = (targetZone.left + targetZone.width/2 - 30) + 'px';
-        el.style.top = (targetZone.top + targetZone.height/2 - 30) + 'px';
+        el.style.left = (targetZone.left + targetZone.width/2 - 30 + (Math.random()*20-10)) + 'px';
+        el.style.top = (targetZone.top + targetZone.height/2 - 30 + (Math.random()*20-10)) + 'px';
         
         itemsPlaced++;
-        if (itemsPlaced === sortingItems.length) {
+        if (itemsPlaced === totalItemsThisRound) {
             playSuccess();
             speak('Awesome job!');
             document.getElementById('sorting-msg').innerText = "You are so smart! 🌟";
             completedSections[currentGroup.title] = true;
             localStorage.setItem('completed', JSON.stringify(completedSections));
-            setTimeout(showMenu, 3000);
+            setTimeout(showMenu, 3500);
         }
     } else {
         speak('Try again!');
+        // Restart the floating animation if they miss
         el.style.animation = "float 3s ease-in-out infinite"; 
     }
 }
