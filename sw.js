@@ -7,10 +7,10 @@ self.addEventListener('install', (e) => {
         '/manifest.json'
       ]))
     );
-  });
+});
   
-  self.addEventListener('fetch', (e) => {
+self.addEventListener('fetch', (e) => {
     e.respondWith(
-      caches.match(e.request).then((response) => response || fetch(e.request))
+        caches.match(e.request).then((response) => response || fetch(e.request))
     );
-  });
+});
