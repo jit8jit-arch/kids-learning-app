@@ -10,10 +10,8 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --primary: #FF5A5F;
-            --secondary: #087E8B;
-            --accent: #FFCA3A;
-            --bg: #F4F1DE;
+            --primary: #FF5A5F; --secondary: #087E8B;
+            --accent: #FFCA3A; --bg: #F4F1DE;
         }
         body {
             margin: 0; padding: 0; background-color: var(--bg);
@@ -23,7 +21,7 @@
         .screen { display: none; flex-direction: column; align-items: center; height: 100vh; width: 100vw; }
         .active-screen { display: flex; }
         
-        /* Premium Header */
+        /* Header & Buttons */
         .header {
             width: 100%; padding: 15px 20px; background: linear-gradient(135deg, var(--secondary), #0b9b9b);
             color: white; display: flex; justify-content: space-between; align-items: center;
@@ -42,36 +40,51 @@
         .grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 90%; max-width: 400px; }
         .menu-btn { padding: 20px; font-size: 22px; background: white; color: var(--secondary); border: 3px solid var(--secondary); box-shadow: 0 6px 0 var(--secondary); border-radius: 20px;}
         
-        /* Tracing Canvas - Notebook Style */
+        /* Tracing Canvas */
         .canvas-container {
             margin-top: 25px; position: relative; width: 90%; max-width: 500px; height: 60%;
             background: white; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             border: 5px solid white; overflow: hidden;
-            background-image: linear-gradient(#e5e5e5 2px, transparent 2px);
-            background-size: 100% 3em; /* Notebook lines */
+            background-image: linear-gradient(#e5e5e5 2px, transparent 2px); background-size: 100% 3em; 
         }
         canvas { width: 100%; height: 100%; display: block; }
         
-        /* Sorting Game - Premium Puzzle */
+        /* Premium Sorting Puzzle */
         #sorting-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; }
         .drop-zones { display: flex; justify-content: space-around; width: 95%; height: 35%; margin-top: 20px; }
         .zone {
-            width: 45%; border-radius: 25px; border: 5px dashed;
+            width: 45%; border-radius: 25px; border: 5px dashed white;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 28px; font-weight: bold; box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+            font-size: 28px; font-weight: bold; box-shadow: inset 0 10px 20px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
         }
-        #zone-fruits { background: #fff0f2; border-color: #ffb3ba; color: #d63031; }
-        #zone-animals { background: #f0fff4; border-color: #b9fbc0; color: #00b894; }
+        #zone-fruits { background: linear-gradient(180deg, #ffdde1, #ff9a9e); color: #c0392b; text-shadow: 1px 1px 0 #fff; }
+        #zone-animals { background: linear-gradient(180deg, #e0f2f1, #80cbc4); color: #00695c; text-shadow: 1px 1px 0 #fff; }
         
+        /* Draggable Items & Animations */
         .draggable {
-            position: absolute; font-size: 60px; cursor: grab; padding: 15px;
-            filter: drop-shadow(0 8px 8px rgba(0,0,0,0.2)); transition: transform 0.1s;
-            animation: float 3s ease-in-out infinite; /* Floating animation */
+            position: absolute; font-size: 55px; cursor: grab; padding: 15px;
+            filter: drop-shadow(0 8px 8px rgba(0,0,0,0.25)); transition: transform 0.1s;
+            /* Combines a pop-in start with an infinite float */
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, float 3s ease-in-out 0.6s infinite;
+        }
+        
+        .success-pulse {
+            animation: successGlow 0.8s ease-out forwards !important;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
         @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes successGlow {
+            0% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
+            50% { transform: scale(1.4); filter: drop-shadow(0 0 20px gold); }
+            100% { transform: scale(1); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
         }
         
         .status-msg { font-size: 30px; font-weight: bold; color: var(--primary); margin-top: 20px; text-shadow: 1px 1px 0 #fff; }
