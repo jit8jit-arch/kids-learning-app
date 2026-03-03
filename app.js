@@ -8,10 +8,9 @@ const ctx = canvas.getContext('2d');
 let completedSections = JSON.parse(localStorage.getItem('completed')) || {};
 
 // --- TRACING ENGINE DATA ---
-// To teach direction, we define the exact path (strokes). 
-// 0,0 is the center of the canvas.
+// Coordinates for drawing direction (0,0 is the center of the canvas)
 const traceData = {
-    '1': [ [ {x: 0, y: -100}, {x: 0, y: 100} ] ], // One stroke straight down
+    '1': [ [ {x: 0, y: -100}, {x: 0, y: 100} ] ],
     'A': [
         [ {x: 0, y: -100}, {x: -60, y: 100} ], // Stroke 1: Top to bottom left
         [ {x: 0, y: -100}, {x: 60, y: 100} ],  // Stroke 2: Top to bottom right
@@ -21,13 +20,38 @@ const traceData = {
         [ {x: -40, y: -100}, {x: -40, y: 100} ], // Stroke 1: Straight down
         [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 40, y: -50}, {x: 20, y: 0}, {x: -40, y: 0} ], // Top curve
         [ {x: -40, y: 0}, {x: 30, y: 0}, {x: 50, y: 50}, {x: 30, y: 100}, {x: -40, y: 100} ]  // Bottom curve
+    ],
+    'C': [
+        // One continuous curve starting from the top right
+        [ {x: 40, y: -80}, {x: 0, y: -100}, {x: -40, y: -50}, {x: -40, y: 50}, {x: 0, y: 100}, {x: 40, y: 80} ]
+    ],
+    'D': [
+        [ {x: -40, y: -100}, {x: -40, y: 100} ], // Stroke 1: Straight line down
+        [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 50, y: -50}, {x: 50, y: 50}, {x: 20, y: 100}, {x: -40, y: 100} ] // Stroke 2: Large right curve
+    ],
+    'E': [
+        [ {x: -40, y: -100}, {x: -40, y: 100} ], // Stroke 1: Straight line down
+        [ {x: -40, y: -100}, {x: 30, y: -100} ], // Stroke 2: Top bar
+        [ {x: -40, y: 0}, {x: 20, y: 0} ],       // Stroke 3: Middle bar (slightly shorter)
+        [ {x: -40, y: 100}, {x: 30, y: 100} ]    // Stroke 4: Bottom bar
+    ],
+    'F': [
+        [ {x: -40, y: -100}, {x: -40, y: 100} ], // Stroke 1: Straight line down
+        [ {x: -40, y: -100}, {x: 30, y: -100} ], // Stroke 2: Top bar
+        [ {x: -40, y: 0}, {x: 20, y: 0} ]        // Stroke 3: Middle bar
+    ],
+    'G': [
+        // Stroke 1: The 'C' curve that continues up to the middle
+        [ {x: 40, y: -80}, {x: 0, y: -100}, {x: -40, y: -50}, {x: -40, y: 50}, {x: 0, y: 100}, {x: 40, y: 50}, {x: 40, y: 0} ],
+        // Stroke 2: The inner crossbar
+        [ {x: 40, y: 0}, {x: 10, y: 0} ]
     ]
-    // You will add C, D, E etc. here using the same coordinate format!
 };
 
 const menuItems = [
-    { type: 'trace', title: 'Numbers (Test 1)', items: ['1'] },
-    { type: 'trace', title: 'Letters (Test A, B)', items: ['A', 'B'] },
+    { type: 'trace', title: 'Numbers (1)', items: ['1'] },
+    { type: 'trace', title: 'Letters A - E', items: ['A', 'B', 'C', 'D', 'E'] },
+    { type: 'trace', title: 'Letters F - G', items: ['F', 'G'] },
     { type: 'sort', title: 'Puzzle: Animals vs Fruits' }
 ];
 
@@ -66,7 +90,11 @@ function resetSection() {
     if (currentGroup) {
         completedSections[currentGroup.title] = false;
         localStorage.setItem('completed', JSON.stringify(completedSections));
-        if (currentGroup.type === 'trace') startTracing();
+        if (currentGroup.type === 'trace') {
+            startTracing();
+        } else if (currentGroup.type === 'sort') {
+            startSorting();
+        }
     }
 }
 
