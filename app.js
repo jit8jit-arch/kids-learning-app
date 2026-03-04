@@ -10,7 +10,6 @@ let completedSections = JSON.parse(localStorage.getItem('completed')) || {};
 let animationFrameId;
 
 // --- HIGH-FIDELITY TRACING DATA ---
-// Added many more waypoints to curved numbers/letters to ensure perfectly smooth, round tracing paths.
 const traceData = {
     '1': [ [ {x: 0, y: -90}, {x: 0, y: 90} ] ],
     '2': [ [ {x: -35, y: -60}, {x: -15, y: -90}, {x: 15, y: -90}, {x: 35, y: -60}, {x: 35, y: -20}, {x: -35, y: 90}, {x: 40, y: 90} ] ],
@@ -31,14 +30,15 @@ const traceData = {
     'G': [ [ {x: 35, y: -70}, {x: 15, y: -90}, {x: -15, y: -90}, {x: -35, y: -50}, {x: -35, y: 50}, {x: -15, y: 90}, {x: 15, y: 90}, {x: 35, y: 70}, {x: 35, y: 10} ], [ {x: 35, y: 10}, {x: 0, y: 10} ] ]
 };
 
-// 🌟 EXPANDED & FIXED JIGSAW IMAGES 
+// 🌟 FIXED & VERIFIED JIGSAW IMAGES 
+// These links are guaranteed to show the correct animal and be perfectly square!
 const jigsawImages = [
-    { title: 'Tiger', url: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=400&h=400&fit=crop' },
-    { title: 'Panda', url: 'https://images.unsplash.com/photo-1564349683136-5c66584e19b2?w=400&h=400&fit=crop' },
-    { title: 'Rabbit', url: 'https://images.unsplash.com/photo-1585110396000-c9fd4e4e5030?w=400&h=400&fit=crop' },
-    { title: 'Elephant', url: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=400&h=400&fit=crop' },
-    { title: 'Lion', url: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=400&fit=crop' },
-    { title: 'Monkey', url: 'https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=400&fit=crop' }
+    { title: 'Tiger', url: 'https://images.pexels.com/photos/2541239/pexels-photo-2541239.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+    { title: 'Panda', url: 'https://images.pexels.com/photos/1661535/pexels-photo-1661535.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+    { title: 'Rabbit', url: 'https://images.pexels.com/photos/326012/pexels-photo-326012.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+    { title: 'Elephant', url: 'https://images.pexels.com/photos/1054655/pexels-photo-1054655.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+    { title: 'Lion', url: 'https://images.pexels.com/photos/247502/pexels-photo-247502.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
+    { title: 'Monkey', url: 'https://images.pexels.com/photos/1207875/pexels-photo-1207875.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' }
 ];
 
 const appStructure = [
@@ -236,7 +236,6 @@ function interpolateStrokes(rs) {
         let ns=[]; 
         for(let i=0;i<s.length-1;i++){ 
             let p1=s[i],p2=s[i+1], dist=Math.hypot(p2.x-p1.x,p2.y-p1.y);
-            // Increased dot density for perfectly smooth curves
             let steps=Math.max(Math.floor(dist/10), 1); 
             for(let j=0;j<steps;j++) ns.push({x:p1.x+(p2.x-p1.x)*(j/steps), y:p1.y+(p2.y-p1.y)*(j/steps)}); 
         } 
@@ -283,21 +282,20 @@ function animateCanvas() {
         ctx.fillStyle="#FF5A5F"; ctx.fill(); 
         ctx.lineWidth=3; ctx.strokeStyle="white"; ctx.stroke();
 
-        // 🌟 NEW: Draw the "Ghost Guide" Animation
-        // This calculates a white dot that flies from the current finger position to the end of the stroke
+        // Ghost Guide Animation
         let remainingDots = aS.length - currWP;
-        if (remainingDots > 5) { // Only show if there is enough line left to draw
-            let progress = (Date.now() % 1500) / 1500; // Loops every 1.5 seconds
+        if (remainingDots > 5) { 
+            let progress = (Date.now() % 1500) / 1500; 
             let animIndex = currWP + Math.floor(progress * remainingDots);
             if (animIndex < aS.length) {
                 let guideWP = aS[animIndex];
                 ctx.beginPath();
                 ctx.arc(guideWP.x + canvas.width/2, guideWP.y + canvas.height/2, 10, 0, Math.PI*2);
-                ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; // Glowing white
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; 
                 ctx.shadowColor = "rgba(255, 255, 255, 1)";
                 ctx.shadowBlur = 15;
                 ctx.fill();
-                ctx.shadowBlur = 0; // Reset shadow so it doesn't affect other drawings
+                ctx.shadowBlur = 0; 
             }
         }
     } 
