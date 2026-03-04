@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kids Learning World</title>
-    <link rel="icon" type="image/png" href="icon-192.png">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="manifest" href="manifest.json">
+    
+    <link rel="icon" type="image/png" href="/kids-learning-app/icon-192.png">
+    <link rel="apple-touch-icon" href="/kids-learning-app/icon-192.png">
+    <link rel="manifest" href="/kids-learning-app/manifest.json">
+    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -84,13 +86,8 @@
             border-radius: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative;
             background-size: cover; background-position: center; background-blend-mode: lighten; opacity: 0.9;
         }
-        /* Grid lines to guide the baby */
-        .jigsaw-board::after {
-            content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px;
-        }
-        .jigsaw-board::before {
-            content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px;
-        }
+        .jigsaw-board::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px; }
+        .jigsaw-board::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px; }
         
         .jigsaw-piece {
             position: absolute; width: 150px; height: 150px; background-size: 300px 300px;
@@ -157,6 +154,13 @@
         <div id="jigsaw-msg" class="status-msg"></div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="/kids-learning-app/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/kids-learning-app/sw.js', { scope: '/kids-learning-app/' })
+            .then(() => console.log("Service Worker Registered Successfully!"))
+            .catch((err) => console.error("Service Worker Failed:", err));
+        }
+    </script>
 </body>
 </html>
