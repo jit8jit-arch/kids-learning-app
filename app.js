@@ -8,8 +8,6 @@ const ctx = canvas.getContext('2d');
 
 let completedSections = JSON.parse(localStorage.getItem('completed')) || {};
 let animationFrameId;
-
-// Sound Settings
 let isSoundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 
 function updateSettingsUI() {
@@ -17,64 +15,36 @@ function updateSettingsUI() {
     btn.innerText = isSoundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
     btn.style.backgroundColor = isSoundEnabled ? '#087E8B' : '#95a5a6';
 }
-
-function toggleSound() {
-    isSoundEnabled = !isSoundEnabled;
-    localStorage.setItem('soundEnabled', isSoundEnabled);
-    updateSettingsUI();
-    if(isSoundEnabled) initAudio(); // Initialize on user interaction
-}
-
+function toggleSound() { isSoundEnabled = !isSoundEnabled; localStorage.setItem('soundEnabled', isSoundEnabled); updateSettingsUI(); if(isSoundEnabled) initAudio(); }
 function openSettings() { document.getElementById('settings-modal').style.display = 'flex'; updateSettingsUI(); }
 function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
 
-// --- PROCEDURAL AUDIO ENGINE (International Standard) ---
-let audioCtx;
-let drawingOsc = null;
-let drawingGain = null;
-
-function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-// Plays a short UI pop/snap
+// --- PROCEDURAL AUDIO ENGINE ---
+let audioCtx, drawingOsc = null, drawingGain = null;
+function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
 function playTone(freq, type, duration, vol=0.1) {
-    if (!isSoundEnabled) return;
-    initAudio();
-    let osc = audioCtx.createOscillator();
-    let gainNode = audioCtx.createGain();
+    if (!isSoundEnabled) return; initAudio();
+    let osc = audioCtx.createOscillator(), gainNode = audioCtx.createGain();
     osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
     gainNode.gain.setValueAtTime(vol, audioCtx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
     osc.connect(gainNode); gainNode.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + duration);
 }
-
 function playPop() { playTone(600, 'sine', 0.1, 0.2); }
 function playSnap() { playTone(800, 'triangle', 0.15, 0.2); playTone(1200, 'sine', 0.1, 0.1); }
+function playError() { playTone(200, 'sawtooth', 0.2, 0.1); }
 function playSuccessChime() {
     if(!isSoundEnabled) return;
-    setTimeout(()=>playTone(440, 'sine', 0.3, 0.2), 0);
-    setTimeout(()=>playTone(554, 'sine', 0.3, 0.2), 150);
-    setTimeout(()=>playTone(659, 'sine', 0.4, 0.2), 300);
-    setTimeout(()=>playTone(880, 'sine', 0.6, 0.2), 450);
+    setTimeout(()=>playTone(440, 'sine', 0.3, 0.2), 0); setTimeout(()=>playTone(554, 'sine', 0.3, 0.2), 150);
+    setTimeout(()=>playTone(659, 'sine', 0.4, 0.2), 300); setTimeout(()=>playTone(880, 'sine', 0.6, 0.2), 450);
 }
-
-// Continuous Drawing Sound
 function startDrawingSound() {
-    if (!isSoundEnabled || drawingOsc) return;
-    initAudio();
-    drawingOsc = audioCtx.createOscillator();
-    drawingGain = audioCtx.createGain();
-    drawingOsc.type = 'triangle';
-    drawingOsc.frequency.setValueAtTime(300, audioCtx.currentTime);
-    drawingGain.gain.setValueAtTime(0, audioCtx.currentTime);
-    drawingGain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.1); // Soft hum
-    drawingOsc.connect(drawingGain); drawingGain.connect(audioCtx.destination);
-    drawingOsc.start();
+    if (!isSoundEnabled || drawingOsc) return; initAudio();
+    drawingOsc = audioCtx.createOscillator(); drawingGain = audioCtx.createGain();
+    drawingOsc.type = 'triangle'; drawingOsc.frequency.setValueAtTime(300, audioCtx.currentTime);
+    drawingGain.gain.setValueAtTime(0, audioCtx.currentTime); drawingGain.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.1);
+    drawingOsc.connect(drawingGain); drawingGain.connect(audioCtx.destination); drawingOsc.start();
 }
 function stopDrawingSound() {
     if (drawingOsc && drawingGain) {
@@ -82,62 +52,109 @@ function stopDrawingSound() {
         setTimeout(() => { if(drawingOsc){ drawingOsc.stop(); drawingOsc = null; } }, 100);
     }
 }
+function playSuccessAnim() { if(isSoundEnabled) playSuccessChime(); confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } }); }
+function speak(text) { if (!isSoundEnabled) return; let u = new SpeechSynthesisUtterance(text); u.rate = 0.85; u.pitch = 1.1; speechSynthesis.speak(u); }
 
-function playSuccessAnim() {
-    if(isSoundEnabled) playSuccessChime();
-    confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 }, colors: ['#FF5A5F', '#FFCA3A', '#087E8B', '#ffffff'] });
-}
-function speak(text) {
-    if (!isSoundEnabled) return;
-    let utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.85; utterance.pitch = 1.1;
-    speechSynthesis.speak(utterance);
-}
-
-// --- DATA ---
+// --- THE MASSIVE TRACING DATA COMPENDIUM ---
 const traceData = {
-    '1': [ [ {x: 0, y: -90}, {x: 0, y: 90} ] ],
-    '2': [ [ {x: -35, y: -60}, {x: -15, y: -90}, {x: 15, y: -90}, {x: 35, y: -60}, {x: 35, y: -20}, {x: -35, y: 90}, {x: 40, y: 90} ] ],
-    '3': [ [ {x: -35, y: -70}, {x: -15, y: -90}, {x: 15, y: -90}, {x: 35, y: -60}, {x: 15, y: -10}, {x: 0, y: 0} ], [ {x: 0, y: 0}, {x: 25, y: 15}, {x: 35, y: 50}, {x: 15, y: 90}, {x: -15, y: 90}, {x: -35, y: 70} ] ],
-    'A': [ [ {x: 0, y: -90}, {x: -50, y: 90} ], [ {x: 0, y: -90}, {x: 50, y: 90} ], [ {x: -25, y: 20}, {x: 25, y: 20} ] ],
-    'B': [ [ {x: -35, y: -90}, {x: -35, y: 90} ], [ {x: -35, y: -90}, {x: 15, y: -90}, {x: 35, y: -50}, {x: 15, y: -10}, {x: -35, y: -10} ], [ {x: -35, y: -10}, {x: 25, y: -10}, {x: 45, y: 40}, {x: 25, y: 90}, {x: -35, y: 90} ] ]
+    '1': [[{x:0,y:-90},{x:0,y:90}]], '2': [[{x:-35,y:-60},{x:0,y:-90},{x:35,y:-60},{x:-35,y:90},{x:40,y:90}]], '3': [[{x:-35,y:-70},{x:0,y:-90},{x:35,y:-60},{x:0,y:0}], [{x:0,y:0},{x:35,y:40},{x:0,y:90},{x:-35,y:70}]], '4': [[{x:20,y:90},{x:20,y:-90},{x:-40,y:20},{x:40,y:20}]], '5': [[{x:35,y:-90},{x:-20,y:-90},{x:-20,y:0},{x:35,y:20},{x:15,y:90},{x:-35,y:70}]],
+    '6': [[{x:30,y:-80},{x:-35,y:20},{x:-15,y:90},{x:35,y:60},{x:-15,y:-10}]], '7': [[{x:-35,y:-90},{x:35,y:-90},{x:-15,y:90}]], '8': [[{x:0,y:-90},{x:-30,y:-45},{x:30,y:45},{x:0,y:90},{x:-30,y:45},{x:30,y:-45},{x:0,y:-90}]], '9': [[{x:30,y:90},{x:30,y:-30},{x:-30,y:-30},{x:30,y:-30}]], '10': [[{x:-40,y:-90},{x:-40,y:90}], [{x:35,y:-90},{x:-5,y:-40},{x:-5,y:40},{x:35,y:90},{x:55,y:40},{x:55,y:-40},{x:35,y:-90}]],
+    'A': [[{x:0,y:-90},{x:-50,y:90}], [{x:0,y:-90},{x:50,y:90}], [{x:-25,y:20},{x:25,y:20}]], 'B': [[{x:-35,y:-90},{x:-35,y:90}], [{x:-35,y:-90},{x:35,y:-50},{x:-35,y:-10}], [{x:-35,y:-10},{x:45,y:40},{x:-35,y:90}]], 'C': [[{x:35,y:-70},{x:-35,y:-50},{x:-35,y:50},{x:35,y:70}]], 'D': [[{x:-35,y:-90},{x:-35,y:90}], [{x:-35,y:-90},{x:45,y:-40},{x:45,y:40},{x:-35,y:90}]],
+    'E': [[{x:-35,y:-90},{x:-35,y:90}], [{x:-35,y:-90},{x:30,y:-90}], [{x:-35,y:0},{x:20,y:0}], [{x:-35,y:90},{x:30,y:90}]], 'F': [[{x:-35,y:-90},{x:-35,y:90}], [{x:-35,y:-90},{x:30,y:-90}], [{x:-35,y:0},{x:20,y:0}]], 'G': [[{x:35,y:-70},{x:-35,y:-50},{x:-35,y:50},{x:35,y:70},{x:35,y:10}], [{x:35,y:10},{x:0,y:10}]],
+    'H': [[{x:-30,y:-90},{x:-30,y:90}], [{x:30,y:-90},{x:30,y:90}], [{x:-30,y:0},{x:30,y:0}]], 'I': [[{x:0,y:-90},{x:0,y:90}], [{x:-20,y:-90},{x:20,y:-90}], [{x:-20,y:90},{x:20,y:90}]], 'J': [[{x:20,y:-90},{x:20,y:50},{x:-20,y:90},{x:-40,y:50}], [{x:-10,y:-90},{x:50,y:-90}]], 'K': [[{x:-30,y:-90},{x:-30,y:90}], [{x:30,y:-90},{x:-30,y:10}], [{x:-10,y:-10},{x:40,y:90}]],
+    'L': [[{x:-30,y:-90},{x:-30,y:90}], [{x:-30,y:90},{x:40,y:90}]], 'M': [[{x:-40,y:90},{x:-40,y:-90}], [{x:-40,y:-90},{x:0,y:20}], [{x:0,y:20},{x:40,y:-90}], [{x:40,y:-90},{x:40,y:90}]], 'N': [[{x:-30,y:90},{x:-30,y:-90}], [{x:-30,y:-90},{x:30,y:90}], [{x:30,y:90},{x:30,y:-90}]], 'O': [[{x:0,y:-90},{x:-40,y:-40},{x:-40,y:40},{x:0,y:90},{x:40,y:40},{x:40,y:-40},{x:0,y:-90}]],
+    'P': [[{x:-30,y:-90},{x:-30,y:90}], [{x:-30,y:-90},{x:30,y:-50},{x:-30,y:-10}]], 'Q': [[{x:0,y:-90},{x:-40,y:-40},{x:-40,y:40},{x:0,y:90},{x:40,y:40},{x:40,y:-40},{x:0,y:-90}], [{x:10,y:40},{x:40,y:90}]], 'R': [[{x:-30,y:-90},{x:-30,y:90}], [{x:-30,y:-90},{x:30,y:-50},{x:-30,y:-10}], [{x:-10,y:-10},{x:30,y:90}]],
+    'S': [[{x:30,y:-60},{x:0,y:-90},{x:-30,y:-50},{x:0,y:0},{x:30,y:50},{x:0,y:90},{x:-30,y:60}]], 'T': [[{x:0,y:-90},{x:0,y:90}], [{x:-40,y:-90},{x:40,y:-90}]], 'U': [[{x:-35,y:-90},{x:-35,y:40},{x:0,y:90},{x:35,y:40},{x:35,y:-90}]], 'V': [[{x:-40,y:-90},{x:0,y:90}], [{x:40,y:-90},{x:0,y:90}]],
+    'W': [[{x:-45,y:-90},{x:-25,y:90}], [{x:-25,y:90},{x:0,y:0}], [{x:0,y:0},{x:25,y:90}], [{x:25,y:90},{x:45,y:-90}]], 'X': [[{x:-35,y:-90},{x:35,y:90}], [{x:35,y:-90},{x:-35,y:90}]], 'Y': [[{x:-40,y:-90},{x:0,y:10}], [{x:40,y:-90},{x:0,y:10}], [{x:0,y:10},{x:0,y:90}]], 'Z': [[{x:-35,y:-90},{x:35,y:-90}], [{x:35,y:-90},{x:-35,y:90}], [{x:-35,y:90},{x:35,y:90}]]
 };
 
-const jigsawImages = [
-    { title: 'Tiger', url: 'https://images.pexels.com/photos/2541239/pexels-photo-2541239.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' },
-    { title: 'Panda', url: 'https://images.pexels.com/photos/1661535/pexels-photo-1661535.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop' }
-];
-
+// 🌟 THE MASSIVE APP STRUCTURE (10+ Sections per Game!)
 const appStructure = [
-    { category: "Trace Numbers", games: [ { type: 'trace', title: 'Numbers 1-3', items: ['1', '2', '3'], icon: '🔢' } ] },
-    { category: "Trace Letters", games: [ { type: 'trace', title: 'Letters A & B', items: ['A', 'B'], icon: '🅰️' } ] },
-    { category: "Sort & Match", games: [ { type: 'sort', title: 'Mega Sorting', icon: '🧺' } ] },
-    { category: "Picture Puzzles", games: [ { type: 'jigsaw', title: 'Tiger', imgIndex: 0, icon: '🐯' }, { type: 'jigsaw', title: 'Panda', imgIndex: 1, icon: '🐼' } ] }
+    {
+        category: "Trace Numbers",
+        games: [
+            { type: 'trace', title: 'Numbers 1-2', items: ['1','2'], icon: '1️⃣' },
+            { type: 'trace', title: 'Numbers 3-4', items: ['3','4'], icon: '3️⃣' },
+            { type: 'trace', title: 'Numbers 5-6', items: ['5','6'], icon: '5️⃣' },
+            { type: 'trace', title: 'Numbers 7-8', items: ['7','8'], icon: '7️⃣' },
+            { type: 'trace', title: 'Numbers 9-10', items: ['9','10'], icon: '🔟' }
+        ]
+    },
+    {
+        category: "Trace Letters",
+        games: [
+            { type: 'trace', title: 'Letters A-D', items: ['A','B','C','D'], icon: '🅰️' },
+            { type: 'trace', title: 'Letters E-H', items: ['E','F','G','H'], icon: '🅴' },
+            { type: 'trace', title: 'Letters I-L', items: ['I','J','K','L'], icon: '🅸' },
+            { type: 'trace', title: 'Letters M-P', items: ['M','N','O','P'], icon: '🅼' },
+            { type: 'trace', title: 'Letters Q-T', items: ['Q','R','S','T'], icon: '🆀' },
+            { type: 'trace', title: 'Letters U-X', items: ['U','V','W','X'], icon: '🆄' },
+            { type: 'trace', title: 'Letters Y-Z', items: ['Y','Z'], icon: '🆈' }
+        ]
+    },
+    {
+        category: "Dynamic Sorting",
+        games: [
+            { type: 'sort', title: 'Fruits vs Animals', icon: '🍎', 
+              z1:{ id:'fruit', label:'🍎 Fruits', bg:'linear-gradient(135deg, #ff9a9e, #fecfef)' }, 
+              z2:{ id:'animal', label:'🐶 Animals', bg:'linear-gradient(135deg, #4facfe, #00f2fe)' },
+              pool: [{e:'🍌',t:'fruit'},{e:'🍉',t:'fruit'},{e:'🍒',t:'fruit'},{e:'🐱',t:'animal'},{e:'🦁',t:'animal'},{e:'🐸',t:'animal'}] },
+            { type: 'sort', title: 'Sea vs Sky', icon: '🌊', 
+              z1:{ id:'sea', label:'🐟 Sea', bg:'linear-gradient(135deg, #89f7fe, #66a6ff)' }, 
+              z2:{ id:'sky', label:'🦅 Sky', bg:'linear-gradient(135deg, #e0c3fc, #8ec5fc)' },
+              pool: [{e:'🐬',t:'sea'},{e:'🐳',t:'sea'},{e:'🐙',t:'sea'},{e:'🦅',t:'sky'},{e:'🦉',t:'sky'},{e:'🦇',t:'sky'}] },
+            { type: 'sort', title: 'Vehicles vs Food', icon: '🚗', 
+              z1:{ id:'veh', label:'🚗 Vehicles', bg:'linear-gradient(135deg, #f6d365, #fda085)' }, 
+              z2:{ id:'food', label:'🍔 Food', bg:'linear-gradient(135deg, #ff0844, #ffb199)' },
+              pool: [{e:'🚕',t:'veh'},{e:'🚓',t:'veh'},{e:'✈️',t:'veh'},{e:'🍕',t:'food'},{e:'🍟',t:'food'},{e:'🌭',t:'food'}] },
+            { type: 'sort', title: 'Bugs vs Flowers', icon: '🐛', 
+              z1:{ id:'bug', label:'🐛 Bugs', bg:'linear-gradient(135deg, #d4fc79, #96e6a1)' }, 
+              z2:{ id:'flow', label:'🌸 Flowers', bg:'linear-gradient(135deg, #fccb90, #d57eeb)' },
+              pool: [{e:'🦋',t:'bug'},{e:'🐞',t:'bug'},{e:'🐝',t:'bug'},{e:'🌻',t:'flow'},{e:'🌹',t:'flow'},{e:'🌷',t:'flow'}] },
+            { type: 'sort', title: 'Space vs Earth', icon: '🚀', 
+              z1:{ id:'space', label:'🚀 Space', bg:'linear-gradient(135deg, #30cfd0, #330867)' }, 
+              z2:{ id:'earth', label:'🌍 Earth', bg:'linear-gradient(135deg, #43e97b, #38f9d7)' },
+              pool: [{e:'👽',t:'space'},{e:'🛸',t:'space'},{e:'⭐',t:'space'},{e:'🌲',t:'earth'},{e:'⛰️',t:'earth'},{e:'🏠',t:'earth'}] },
+            { type: 'sort', title: 'Hot vs Cold', icon: '🔥', 
+              z1:{ id:'hot', label:'🔥 Hot', bg:'linear-gradient(135deg, #f83600, #f9d423)' }, 
+              z2:{ id:'cold', label:'❄️ Cold', bg:'linear-gradient(135deg, #00c6ff, #0072ff)' },
+              pool: [{e:'☀️',t:'hot'},{e:'☕',t:'hot'},{e:'🌶️',t:'hot'},{e:'⛄',t:'cold'},{e:'🧊',t:'cold'},{e:'🍦',t:'cold'}] }
+        ]
+    },
+    {
+        category: "Picture Puzzles",
+        games: [
+            { type: 'jigsaw', title: 'Tiger', url: 'https://images.pexels.com/photos/2541239/pexels-photo-2541239.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐯' },
+            { type: 'jigsaw', title: 'Panda', url: 'https://images.pexels.com/photos/1661535/pexels-photo-1661535.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐼' },
+            { type: 'jigsaw', title: 'Rabbit', url: 'https://images.pexels.com/photos/326012/pexels-photo-326012.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐰' },
+            { type: 'jigsaw', title: 'Elephant', url: 'https://images.pexels.com/photos/1054655/pexels-photo-1054655.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐘' },
+            { type: 'jigsaw', title: 'Lion', url: 'https://images.pexels.com/photos/247502/pexels-photo-247502.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🦁' },
+            { type: 'jigsaw', title: 'Monkey', url: 'https://images.pexels.com/photos/1207875/pexels-photo-1207875.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐵' },
+            { type: 'jigsaw', title: 'Puppy', url: 'https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐶' },
+            { type: 'jigsaw', title: 'Kitten', url: 'https://images.pexels.com/photos/104827/cat-pet-animal-domestic-104827.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐱' },
+            { type: 'jigsaw', title: 'Dolphin', url: 'https://images.pexels.com/photos/64219/dolphin-marine-mammals-water-sea-64219.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐬' },
+            { type: 'jigsaw', title: 'Penguin', url: 'https://images.pexels.com/photos/689784/pexels-photo-689784.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐧' },
+            { type: 'jigsaw', title: 'Turtle', url: 'https://images.pexels.com/photos/1618606/pexels-photo-1618606.jpeg?auto=compress&cs=tinysrgb&w=400&h=400&fit=crop', icon: '🐢' }
+        ]
+    }
 ];
 
 let currentGroup = null;
 
 // --- MENU LOGIC ---
 function buildMenu() {
-    const container = document.getElementById('menu-container');
-    container.innerHTML = '';
+    const container = document.getElementById('menu-container'); container.innerHTML = '';
     appStructure.forEach(section => {
         let title = document.createElement('div'); title.className = 'category-title'; title.innerText = section.category; container.appendChild(title);
         let grid = document.createElement('div'); grid.className = 'grid';
         section.games.forEach((game) => {
             let btn = document.createElement('button'); btn.className = 'menu-btn';
-            btn.innerHTML = `<span class="menu-icon">${game.icon}</span><span>${game.title}</span>`;
-            btn.onclick = () => {
-                initAudio(); // Initialize audio engine on first real click
-                playPop();
-                currentGroup = game;
-                if (game.type === 'trace') startTracing();
-                if (game.type === 'sort') startSorting();
-                if (game.type === 'jigsaw') startJigsaw();
-            };
-            grid.appendChild(btn);
-        });
-        container.appendChild(grid);
+            let badge = completedSections[game.title] ? '<span class="finished-badge">✔ Done</span>' : '';
+            btn.innerHTML = `<span class="menu-icon">${game.icon}</span><span>${game.title}</span>${badge}`;
+            btn.onclick = () => { initAudio(); playPop(); currentGroup = game;
+                if (game.type === 'trace') startTracing(); if (game.type === 'sort') startSorting(); if (game.type === 'jigsaw') startJigsaw();
+            }; grid.appendChild(btn);
+        }); container.appendChild(grid);
     });
 }
 
@@ -146,72 +163,56 @@ function showMenu() {
     tracingScreen.classList.remove('active-screen'); sortingScreen.classList.remove('active-screen'); jigsawScreen.classList.remove('active-screen');
     menuScreen.classList.add('active-screen'); buildMenu();
 }
-
-function resetSection() {
-    if (currentGroup) {
-        playPop();
-        if (currentGroup.type === 'trace') startTracing(); else if (currentGroup.type === 'sort') startSorting(); else if (currentGroup.type === 'jigsaw') startJigsaw();
-    }
-}
+function resetSection() { if (currentGroup) { playPop(); if (currentGroup.type === 'trace') startTracing(); else if (currentGroup.type === 'sort') startSorting(); else if (currentGroup.type === 'jigsaw') startJigsaw(); } }
 
 // ==========================================
-// 🧺 MEGA SORTING GAME (12 Items!)
+// 🧺 DYNAMIC SORTING ENGINE
 // ==========================================
-const fullSortPool = [
-    {e:'🍎',t:'fruit'}, {e:'🍌',t:'fruit'}, {e:'🍇',t:'fruit'}, {e:'🍓',t:'fruit'}, {e:'🍉',t:'fruit'}, {e:'🍒',t:'fruit'}, {e:'🥝',t:'fruit'}, {e:'🍍',t:'fruit'},
-    {e:'🐶',t:'animal'}, {e:'🐱',t:'animal'}, {e:'🐸',t:'animal'}, {e:'🦁',t:'animal'}, {e:'🐼',t:'animal'}, {e:'🐷',t:'animal'}, {e:'🐙',t:'animal'}, {e:'🦊',t:'animal'}
-];
-
 function startSorting() {
     menuScreen.classList.remove('active-screen'); sortingScreen.classList.add('active-screen'); 
-    document.getElementById('sorting-msg').innerText = "Match 12 Items!";
-    const area = document.getElementById('sorting-area'); document.querySelectorAll('.sort-item').forEach(el => el.remove()); 
+    document.getElementById('sorting-msg').innerText = "Sort the items!";
     
+    // Dynamically build the Drop Zones
+    const dzContainer = document.getElementById('dynamic-drop-zones');
+    dzContainer.innerHTML = '';
+    
+    let z1 = document.createElement('div'); z1.className = 'zone'; z1.id = 'zone-1'; z1.innerHTML = currentGroup.z1.label; z1.style.background = currentGroup.z1.bg;
+    let z2 = document.createElement('div'); z2.className = 'zone'; z2.id = 'zone-2'; z2.innerHTML = currentGroup.z2.label; z2.style.background = currentGroup.z2.bg;
+    dzContainer.appendChild(z1); dzContainer.appendChild(z2);
+
+    const area = document.getElementById('sorting-area'); document.querySelectorAll('.sort-item').forEach(el => el.remove()); 
     let placed = 0;
-    // Pick exactly 12 items for a crowded, fun screen
-    let activeItems = fullSortPool.sort(() => 0.5 - Math.random()).slice(0, 12);
+    
+    // Duplicate pool to ensure a crowded 12-item screen
+    let activeItems = [...currentGroup.pool, ...currentGroup.pool].sort(() => 0.5 - Math.random());
 
     activeItems.forEach((item, i) => {
         let el = document.createElement('div'); el.className = 'sort-item'; el.innerText = item.e; el.dataset.type = item.t;
-        
-        // Spread across the entire bottom half
-        el.style.left = (Math.random()*75+5)+'%'; el.style.top = (Math.random()*45+45)+'%';
-        
-        // Dynamic floating physics
+        el.style.left = (Math.random()*75+5)+'%'; el.style.top = (Math.random()*40+45)+'%';
         let floatSpeed = (Math.random() * 2 + 2).toFixed(1);
         el.style.animation = `popIn 0.5s forwards, float ${floatSpeed}s ease-in-out ${Math.random()}s infinite`;
 
-        el.addEventListener('touchstart', (e) => { 
-            playTone(300, 'sine', 0.1); // Pick up sound
-            el.style.transform="scale(1.4)"; el.style.animation="none"; el.style.zIndex="100"; 
-        });
-        el.addEventListener('touchmove', (e) => { 
-            e.preventDefault(); 
-            el.style.left=(e.touches[0].clientX-40)+'px'; el.style.top=(e.touches[0].clientY-100)+'px'; 
-        });
+        el.addEventListener('touchstart', (e) => { playTone(300, 'sine', 0.1); el.style.transform="scale(1.4)"; el.style.animation="none"; el.style.zIndex="100"; });
+        el.addEventListener('touchmove', (e) => { e.preventDefault(); el.style.left=(e.touches[0].clientX-40)+'px'; el.style.top=(e.touches[0].clientY-100)+'px'; });
         el.addEventListener('touchend', (e) => {
             el.style.transform="scale(1)"; el.style.zIndex="1";
-            let fZ = document.getElementById('zone-fruits').getBoundingClientRect(), aZ = document.getElementById('zone-animals').getBoundingClientRect();
-            let touch = e.changedTouches[0], inF = touch.clientX>fZ.left && touch.clientX<fZ.right && touch.clientY>fZ.top && touch.clientY<fZ.bottom;
-            let inA = touch.clientX>aZ.left && touch.clientX<aZ.right && touch.clientY>aZ.top && touch.clientY<aZ.bottom;
+            let r1 = z1.getBoundingClientRect(), r2 = z2.getBoundingClientRect();
+            let touch = e.changedTouches[0];
+            let in1 = touch.clientX>r1.left && touch.clientX<r1.right && touch.clientY>r1.top && touch.clientY<r1.bottom;
+            let in2 = touch.clientX>r2.left && touch.clientX<r2.right && touch.clientY>r2.top && touch.clientY<r2.bottom;
             
-            if ((item.t==='fruit'&&inF) || (item.t==='animal'&&inA)) {
-                playSnap(); // Drop sound
-                el.style.pointerEvents='none'; 
-                el.style.left = (item.t==='fruit'?fZ.left:aZ.left) + 20 + (Math.random()*40) + 'px'; 
-                el.style.top = fZ.top + 20 + (Math.random()*40) + 'px'; 
+            if ((item.t===currentGroup.z1.id && in1) || (item.t===currentGroup.z2.id && in2)) {
+                playSnap(); el.style.pointerEvents='none'; 
+                el.style.left = (item.t===currentGroup.z1.id ? r1.left : r2.left) + 20 + (Math.random()*40) + 'px'; 
+                el.style.top = r1.top + 20 + (Math.random()*40) + 'px'; 
                 placed++;
                 if(placed===12){ 
-                    playSuccessAnim(); speak('Incredible!'); 
-                    document.getElementById('sorting-msg').innerText = "You did it! 🌟";
+                    playSuccessAnim(); speak('Incredible!'); document.getElementById('sorting-msg').innerText = "You did it! 🌟";
+                    completedSections[currentGroup.title] = true; localStorage.setItem('completed', JSON.stringify(completedSections));
                     setTimeout(showMenu,3500); 
                 }
-            } else { 
-                playTone(200, 'sawtooth', 0.2); // Error bump sound
-                el.style.animation=`float ${floatSpeed}s infinite`; 
-            }
-        }); 
-        area.appendChild(el);
+            } else { playError(); el.style.animation=`float ${floatSpeed}s infinite`; }
+        }); area.appendChild(el);
     });
 }
 
@@ -222,14 +223,13 @@ function startJigsaw() {
     menuScreen.classList.remove('active-screen'); jigsawScreen.classList.add('active-screen');
     document.getElementById('jigsaw-title').innerText = currentGroup.title; document.getElementById('jigsaw-msg').innerText = "Make the picture!";
     const board = document.getElementById('jigsaw-board'); const area = document.getElementById('jigsaw-area');
-    const imgObj = jigsawImages[currentGroup.imgIndex];
-    board.style.backgroundImage = `url('${imgObj.url}')`;
+    board.style.backgroundImage = `url('${currentGroup.url}')`;
     document.querySelectorAll('.jigsaw-piece').forEach(el => el.remove());
     let placed = 0; const positions = [ { id: 0, x: 0, y: 0 }, { id: 1, x: 160, y: 0 }, { id: 2, x: 0, y: 160 }, { id: 3, x: 160, y: 160 } ];
 
     positions.forEach((pos, index) => {
         let piece = document.createElement('div'); piece.className = 'jigsaw-piece';
-        piece.style.backgroundImage = `url('${imgObj.url}')`; piece.style.backgroundPosition = `-${pos.x}px -${pos.y}px`;
+        piece.style.backgroundImage = `url('${currentGroup.url}')`; piece.style.backgroundPosition = `-${pos.x}px -${pos.y}px`;
         piece.style.left = (Math.random() * 50 + 10) + '%'; piece.style.top = (Math.random() * 20 + 60) + '%';
         piece.style.animation = `popIn 0.5s ${index*0.1}s forwards`; piece.dataset.tx = pos.x; piece.dataset.ty = pos.y;
         
@@ -241,14 +241,18 @@ function startJigsaw() {
             if (Math.abs((pR.left - bR.left) - pos.x) < 60 && Math.abs((pR.top - bR.top) - pos.y) < 60) {
                 playSnap(); piece.style.left = (bR.left + pos.x) + 'px'; piece.style.top = (bR.top + pos.y) + 'px';
                 piece.style.pointerEvents = 'none'; piece.style.border = "none"; piece.style.boxShadow = "none";
-                placed++; if (placed === 4) { playSuccessAnim(); speak(currentGroup.title); document.getElementById('jigsaw-msg').innerText = "Beautiful! 🌟"; setTimeout(showMenu, 3500); }
-            } else { playTone(200, 'sawtooth', 0.2); piece.style.top = '70%'; }
+                placed++; if (placed === 4) { 
+                    playSuccessAnim(); speak(currentGroup.title); document.getElementById('jigsaw-msg').innerText = "Beautiful! 🌟"; 
+                    completedSections[currentGroup.title] = true; localStorage.setItem('completed', JSON.stringify(completedSections));
+                    setTimeout(showMenu, 3500); 
+                }
+            } else { playError(); piece.style.top = '70%'; }
         }); area.appendChild(piece);
     });
 }
 
 // ==========================================
-// ✍️ TRACING ENGINE (With Audio integration)
+// ✍️ TRACING ENGINE
 // ==========================================
 let smoothStrokes=[], currStroke=0, currWP=0, drawn=[], isFinished=false;
 
@@ -290,6 +294,15 @@ function animateCanvas() {
         let aS = smoothStrokes[currStroke]; 
         for(let i=currWP;i<aS.length;i++){ ctx.beginPath(); ctx.arc(aS[i].x+canvas.width/2,aS[i].y+canvas.height/2,8,0,Math.PI*2); ctx.fillStyle="#FFCA3A"; ctx.fill(); }
         let tWP = aS[currWP]; ctx.beginPath(); ctx.arc(tWP.x+canvas.width/2,tWP.y+canvas.height/2,20+(Math.sin(Date.now()/150)*5),0,Math.PI*2); ctx.fillStyle="#FF5A5F"; ctx.fill(); ctx.lineWidth=4; ctx.strokeStyle="white"; ctx.stroke();
+        
+        let rem = aS.length - currWP;
+        if (rem > 5) { 
+            let p = (Date.now() % 1500) / 1500; let aI = currWP + Math.floor(p * rem);
+            if (aI < aS.length) {
+                ctx.beginPath(); ctx.arc(aS[aI].x + canvas.width/2, aS[aI].y + canvas.height/2, 10, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; ctx.shadowColor = "white"; ctx.shadowBlur = 15; ctx.fill(); ctx.shadowBlur = 0; 
+            }
+        }
     } animationFrameId = requestAnimationFrame(animateCanvas);
 }
 
@@ -301,7 +314,6 @@ canvas.addEventListener('touchmove', (e) => {
     let t=e.touches[0], r=canvas.getBoundingClientRect();
     let d=Math.sqrt(Math.pow((t.clientX-r.left-canvas.width/2)-smoothStrokes[currStroke][currWP].x,2) + Math.pow((t.clientY-r.top-canvas.height/2)-smoothStrokes[currStroke][currWP].y,2));
     
-    // Slight modulation of sound for fun
     if (drawingOsc) drawingOsc.frequency.setValueAtTime(300 + (currWP * 2), audioCtx.currentTime);
 
     if(d<60){ 
@@ -312,7 +324,14 @@ canvas.addEventListener('touchmove', (e) => {
                 isFinished=true; cancelAnimationFrame(animationFrameId); 
                 ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#087E8B"; ctx.fillText(currentGroup.items[currentItemIndex],canvas.width/2,canvas.height/2);
                 playSuccessAnim(); speak(currentGroup.items[currentItemIndex]); document.getElementById('tracing-msg').innerText="Perfect! 🎉"; 
-                setTimeout(()=>{ currentItemIndex++; if(currentItemIndex<currentGroup.items.length) loadLetter(); else showMenu(); }, 2500);
+                setTimeout(()=>{ 
+                    currentItemIndex++; 
+                    if(currentItemIndex<currentGroup.items.length) loadLetter(); 
+                    else {
+                        completedSections[currentGroup.title] = true; localStorage.setItem('completed', JSON.stringify(completedSections));
+                        showMenu(); 
+                    }
+                }, 2500);
             }
         }
     }
