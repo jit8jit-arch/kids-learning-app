@@ -11,7 +11,7 @@
     <style>
         :root {
             --primary: #FF5A5F; --secondary: #087E8B;
-            --accent: #FFCA3A; --bg: #F4F1DE;
+            --accent: #FFCA3A; --bg: #F4F1DE; --text: #333;
         }
         body {
             margin: 0; padding: 0; background-color: var(--bg);
@@ -21,26 +21,37 @@
         .screen { display: none; flex-direction: column; align-items: center; height: 100vh; width: 100vw; }
         .active-screen { display: flex; }
         
-        /* Header & Buttons */
+        /* Premium Header */
         .header {
             width: 100%; padding: 15px 20px; background: linear-gradient(135deg, var(--secondary), #0b9b9b);
             color: white; display: flex; justify-content: space-between; align-items: center;
             box-sizing: border-box; font-size: 24px; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; z-index: 10;
         }
-        button {
+        .icon-btn {
             background: var(--accent); border: none; color: #333; padding: 10px 20px;
-            border-radius: 15px; font-size: 18px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 5px 0 #dca71b; transition: all 0.1s;
+            border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 5px 0 #dca71b; transition: all 0.1s; display: flex; align-items: center; gap: 5px;
         }
-        button:active { transform: translateY(5px); box-shadow: 0 0px 0 #dca71b; }
+        .icon-btn:active { transform: translateY(5px); box-shadow: 0 0px 0 #dca71b; }
         
-        /* Menu */
-        h1 { color: var(--primary); text-shadow: 3px 3px 0px #fff; font-size: 40px; text-align: center; margin-top: 40px; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; width: 90%; max-width: 400px; }
-        .menu-btn { padding: 20px; font-size: 22px; background: white; color: var(--secondary); border: 3px solid var(--secondary); box-shadow: 0 6px 0 var(--secondary); border-radius: 20px;}
+        /* Mega Menu Hub */
+        h1 { color: var(--primary); text-shadow: 3px 3px 0px #fff; font-size: 42px; text-align: center; margin: 30px 0 20px 0; line-height: 1.1; }
+        .menu-container { width: 90%; max-width: 500px; height: 75vh; overflow-y: auto; padding-bottom: 30px; }
         
-        /* Tracing Canvas */
+        .category-title { font-size: 24px; color: var(--secondary); border-bottom: 3px dashed var(--accent); margin-top: 20px; margin-bottom: 15px; padding-bottom: 5px; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .menu-btn { 
+            padding: 15px 10px; font-size: 20px; background: white; color: var(--text); 
+            border: 4px solid var(--secondary); box-shadow: 0 6px 0 var(--secondary); 
+            border-radius: 20px; font-weight: bold; display: flex; flex-direction: column; 
+            align-items: center; gap: 10px; transition: transform 0.1s;
+        }
+        .menu-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 var(--secondary); }
+        .menu-icon { font-size: 40px; }
+        
+        /* Tracing Game */
         .canvas-container {
             margin-top: 25px; position: relative; width: 90%; max-width: 500px; height: 60%;
             background: white; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -49,72 +60,81 @@
         }
         canvas { width: 100%; height: 100%; display: block; }
         
-        /* Premium Sorting Puzzle */
+        /* Sorting Game */
         #sorting-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; }
         .drop-zones { display: flex; justify-content: space-around; width: 95%; height: 35%; margin-top: 20px; }
         .zone {
-            width: 45%; border-radius: 25px; border: 5px dashed white;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 28px; font-weight: bold; box-shadow: inset 0 10px 20px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
+            width: 45%; border-radius: 25px; border: 5px dashed white; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; font-size: 28px; font-weight: bold; 
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
         }
         #zone-fruits { background: linear-gradient(180deg, #ffdde1, #ff9a9e); color: #c0392b; text-shadow: 1px 1px 0 #fff; }
         #zone-animals { background: linear-gradient(180deg, #e0f2f1, #80cbc4); color: #00695c; text-shadow: 1px 1px 0 #fff; }
         
-        /* Draggable Items & Animations */
-        .draggable {
-            position: absolute; font-size: 55px; cursor: grab; padding: 15px;
+        .sort-item {
+            position: absolute; font-size: 60px; cursor: grab; padding: 10px;
             filter: drop-shadow(0 8px 8px rgba(0,0,0,0.25)); transition: transform 0.1s;
-            /* Combines a pop-in start with an infinite float */
-            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, float 3s ease-in-out 0.6s infinite;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, float 3s ease-in-out 0.5s infinite;
         }
         
-        .success-pulse {
-            animation: successGlow 0.8s ease-out forwards !important;
+        /* Jigsaw Puzzle Game */
+        #jigsaw-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
+        .jigsaw-board {
+            width: 300px; height: 300px; background-color: rgba(255,255,255,0.5); border: 8px solid var(--secondary);
+            border-radius: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative;
+            background-size: cover; background-position: center; background-blend-mode: lighten; opacity: 0.9;
         }
+        /* Grid lines to guide the baby */
+        .jigsaw-board::after {
+            content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px;
+        }
+        .jigsaw-board::before {
+            content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px;
+        }
+        
+        .jigsaw-piece {
+            position: absolute; width: 150px; height: 150px; background-size: 300px 300px;
+            border-radius: 10px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); border: 3px solid white;
+            cursor: grab; transition: transform 0.1s; z-index: 5;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        
+        .success-pulse { animation: successGlow 0.6s ease-out forwards !important; }
 
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-12px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         @keyframes successGlow {
             0% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
-            50% { transform: scale(1.4); filter: drop-shadow(0 0 20px gold); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 25px gold); z-index: 20; }
             100% { transform: scale(1); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
         }
         
-        .status-msg { font-size: 30px; font-weight: bold; color: var(--primary); margin-top: 20px; text-shadow: 1px 1px 0 #fff; }
-        .finished-badge { background: #4CAF50; color: white; padding: 5px 12px; border-radius: 15px; font-size: 16px; margin-left: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        .status-msg { font-size: 32px; font-weight: bold; color: var(--primary); margin-top: 15px; text-shadow: 2px 2px 0 #fff; text-align: center;}
     </style>
 </head>
 <body>
 
     <div id="menu-screen" class="screen active-screen">
-        <h1>Kids Learning! 🌟</h1>
-        <div class="grid" id="menu-grid"></div>
+        <h1>Kids Learning Hub 🌟</h1>
+        <div class="menu-container" id="menu-container">
+            </div>
     </div>
 
     <div id="tracing-screen" class="screen">
         <div class="header">
-            <button onclick="showMenu()">🏠</button>
+            <button class="icon-btn" onclick="showMenu()">🏠</button>
             <span id="tracing-title">Learn to Write</span>
-            <button onclick="resetSection()">🔄</button>
+            <button class="icon-btn" onclick="resetSection()">🔄</button>
         </div>
-        <div class="canvas-container">
-            <canvas id="drawingCanvas"></canvas>
-        </div>
+        <div class="canvas-container"><canvas id="drawingCanvas"></canvas></div>
         <div id="tracing-msg" class="status-msg"></div>
     </div>
 
     <div id="sorting-screen" class="screen">
         <div class="header">
-            <button onclick="showMenu()">🏠</button>
+            <button class="icon-btn" onclick="showMenu()">🏠</button>
             <span>Sort Items!</span>
-            <button onclick="startSorting()">🔄</button>
+            <button class="icon-btn" onclick="startSorting()">🔄</button>
         </div>
         <div id="sorting-area">
             <div class="drop-zones">
@@ -123,6 +143,18 @@
             </div>
         </div>
         <div id="sorting-msg" class="status-msg"></div>
+    </div>
+
+    <div id="jigsaw-screen" class="screen">
+        <div class="header">
+            <button class="icon-btn" onclick="showMenu()">🏠</button>
+            <span id="jigsaw-title">Picture Puzzle</span>
+            <button class="icon-btn" onclick="startJigsaw()">🔄</button>
+        </div>
+        <div id="jigsaw-area">
+            <div class="jigsaw-board" id="jigsaw-board"></div>
+            </div>
+        <div id="jigsaw-msg" class="status-msg"></div>
     </div>
 
     <script src="app.js"></script>
