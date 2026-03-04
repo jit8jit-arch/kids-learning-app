@@ -13,108 +13,114 @@
     <style>
         :root {
             --primary: #FF5A5F; --secondary: #087E8B;
-            --accent: #FFCA3A; --bg: #F4F1DE; --text: #333;
+            --accent: #FFCA3A; --bg: #F0F4F8; --text: #2C3E50;
+            --card-bg: rgba(255, 255, 255, 0.95);
         }
         body {
             margin: 0; padding: 0; background-color: var(--bg);
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Nunito', sans-serif;
             overflow: hidden; touch-action: none; user-select: none;
+            background-image: radial-gradient(circle at top right, #e0eaf5, var(--bg));
         }
-        .screen { display: none; flex-direction: column; align-items: center; height: 100vh; width: 100vw; }
+        .screen { display: none; flex-direction: column; align-items: center; height: 100vh; width: 100vw; animation: fadeIn 0.4s ease-out; }
         .active-screen { display: flex; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
         
         /* Premium Header */
         .header {
-            width: 100%; padding: 15px 20px; background: linear-gradient(135deg, var(--secondary), #0b9b9b);
+            width: 100%; padding: 15px 25px; background: linear-gradient(135deg, var(--secondary), #065a63);
             color: white; display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box; font-size: 24px; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15); border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; z-index: 10;
+            box-sizing: border-box; font-size: 26px; font-weight: 800; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 20px rgba(8, 126, 139, 0.3); border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; z-index: 10;
         }
         .icon-btn {
-            background: var(--accent); border: none; color: #333; padding: 10px 20px;
-            border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 5px 0 #dca71b; transition: all 0.1s; display: flex; align-items: center; gap: 5px;
+            background: var(--accent); border: none; color: #333; padding: 12px;
+            border-radius: 50%; font-size: 22px; cursor: pointer;
+            box-shadow: 0 6px 0 #dca71b, 0 10px 10px rgba(0,0,0,0.1); transition: all 0.1s; display: flex; align-items: center; justify-content: center; width: 50px; height: 50px;
         }
-        .icon-btn:active { transform: translateY(5px); box-shadow: 0 0px 0 #dca71b; }
+        .icon-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 #dca71b; }
         
         /* Mega Menu Hub */
-        h1 { color: var(--primary); text-shadow: 3px 3px 0px #fff; font-size: 42px; text-align: center; margin: 30px 0 20px 0; line-height: 1.1; }
+        h1 { color: var(--primary); text-shadow: 3px 3px 0px #fff, 0 5px 10px rgba(255,90,95,0.2); font-size: 44px; text-align: center; margin: 30px 0 20px 0; line-height: 1.1; }
         .menu-container { width: 90%; max-width: 500px; height: 75vh; overflow-y: auto; padding-bottom: 30px; }
         
-        .category-title { font-size: 24px; color: var(--secondary); border-bottom: 3px dashed var(--accent); margin-top: 20px; margin-bottom: 15px; padding-bottom: 5px; }
+        .category-title { font-size: 22px; color: var(--secondary); margin-top: 25px; margin-bottom: 15px; padding-left: 10px; border-left: 6px solid var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
         
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
         .menu-btn { 
-            padding: 15px 10px; font-size: 20px; background: white; color: var(--text); 
-            border: 4px solid var(--secondary); box-shadow: 0 6px 0 var(--secondary); 
-            border-radius: 20px; font-weight: bold; display: flex; flex-direction: column; 
-            align-items: center; gap: 10px; transition: transform 0.1s;
+            padding: 20px 10px; font-size: 20px; background: var(--card-bg); color: var(--text); 
+            border: 4px solid white; box-shadow: 0 8px 15px rgba(0,0,0,0.05), 0 6px 0 var(--secondary); 
+            border-radius: 25px; font-weight: bold; display: flex; flex-direction: column; 
+            align-items: center; gap: 12px; transition: transform 0.1s;
         }
         .menu-btn:active { transform: translateY(6px); box-shadow: 0 0px 0 var(--secondary); }
-        .menu-icon { font-size: 40px; }
+        .menu-icon { font-size: 45px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
         
-        /* Tracing Game */
+        /* Game Areas */
         .canvas-container {
             margin-top: 25px; position: relative; width: 90%; max-width: 500px; height: 60%;
-            background: white; border-radius: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            border: 5px solid white; overflow: hidden;
-            background-image: linear-gradient(#e5e5e5 2px, transparent 2px); background-size: 100% 3em; 
+            background: white; border-radius: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 6px solid white; overflow: hidden;
+            background-image: linear-gradient(#f1f1f1 2px, transparent 2px); background-size: 100% 3em; 
         }
-        canvas { width: 100%; height: 100%; display: block; }
+        canvas { width: 100%; height: 100%; display: block; touch-action: none; }
         
-        /* Sorting Game */
-        #sorting-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; }
+        #sorting-area, #jigsaw-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; }
         .drop-zones { display: flex; justify-content: space-around; width: 95%; height: 35%; margin-top: 20px; }
         .zone {
-            width: 45%; border-radius: 25px; border: 5px dashed white; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; font-size: 28px; font-weight: bold; 
-            box-shadow: inset 0 10px 20px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.1);
+            width: 45%; border-radius: 30px; border: 6px dashed rgba(255,255,255,0.8); display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; font-size: 30px; font-weight: 900; 
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.1), 0 8px 20px rgba(0,0,0,0.1); backdrop-filter: blur(5px);
         }
-        #zone-fruits { background: linear-gradient(180deg, #ffdde1, #ff9a9e); color: #c0392b; text-shadow: 1px 1px 0 #fff; }
-        #zone-animals { background: linear-gradient(180deg, #e0f2f1, #80cbc4); color: #00695c; text-shadow: 1px 1px 0 #fff; }
+        #zone-fruits { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        #zone-animals { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
         
         .sort-item {
-            position: absolute; font-size: 60px; cursor: grab; padding: 10px;
-            filter: drop-shadow(0 8px 8px rgba(0,0,0,0.25)); transition: transform 0.1s;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards, float 3s ease-in-out 0.5s infinite;
+            position: absolute; font-size: 55px; cursor: grab; padding: 10px;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); transition: transform 0.1s;
         }
         
-        /* Jigsaw Puzzle Game */
-        #jigsaw-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; padding-top: 30px; }
         .jigsaw-board {
-            width: 300px; height: 300px; background-color: rgba(255,255,255,0.5); border: 8px solid var(--secondary);
-            border-radius: 15px; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative;
-            background-size: cover; background-position: center; background-blend-mode: lighten; opacity: 0.9;
+            width: 320px; height: 320px; background-color: rgba(255,255,255,0.7); border: 8px solid var(--secondary);
+            border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2), 0 10px 30px rgba(0,0,0,0.1); position: relative;
+            background-size: cover; background-position: center; background-blend-mode: overlay; opacity: 0.9; margin-top: 30px;
         }
-        .jigsaw-board::after { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px; }
-        .jigsaw-board::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 4px; background: rgba(8, 126, 139, 0.3); border-radius: 2px; }
-        
         .jigsaw-piece {
-            position: absolute; width: 150px; height: 150px; background-size: 300px 300px;
-            border-radius: 10px; box-shadow: 0 10px 15px rgba(0,0,0,0.3); border: 3px solid white;
+            position: absolute; width: 160px; height: 160px; background-size: 320px 320px;
+            border-radius: 12px; box-shadow: 0 12px 20px rgba(0,0,0,0.4); border: 4px solid white;
             cursor: grab; transition: transform 0.1s; z-index: 5;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         
-        .success-pulse { animation: successGlow 0.6s ease-out forwards !important; }
-
-        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        @keyframes successGlow {
-            0% { transform: scale(1); filter: drop-shadow(0 0 0px gold); }
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 25px gold); z-index: 20; }
-            100% { transform: scale(1); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
-        }
+        .status-msg { font-size: 34px; font-weight: 900; color: var(--primary); margin-top: 20px; text-shadow: 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.1); text-align: center;}
         
-        .status-msg { font-size: 32px; font-weight: bold; color: var(--primary); margin-top: 15px; text-shadow: 2px 2px 0 #fff; text-align: center;}
+        /* Settings Modal */
+        #settings-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 100;
+            justify-content: center; align-items: center;
+        }
+        .settings-card {
+            background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 350px;
+            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); animation: fadeIn 0.3s;
+        }
+        .toggle-btn {
+            background: var(--secondary); color: white; border: none; padding: 15px 30px;
+            border-radius: 20px; font-size: 22px; font-weight: bold; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 6px 0 #065a63; width: 100%;
+        }
+        .toggle-btn:active { transform: translateY(6px); box-shadow: 0 0 0; }
+        .close-modal { margin-top: 15px; background: #e0e0e0; color: #333; box-shadow: 0 6px 0 #bdbdbd; }
     </style>
 </head>
 <body>
 
     <div id="menu-screen" class="screen active-screen">
-        <h1>Kids Learning Hub 🌟</h1>
-        <div class="menu-container" id="menu-container">
-            </div>
+        <div class="header" style="justify-content: center; position: relative;">
+            <span>Kids Learning Hub 🌟</span>
+            <button class="icon-btn" onclick="openSettings()" style="position: absolute; right: 20px;">⚙️</button>
+        </div>
+        <div class="menu-container" id="menu-container"></div>
     </div>
 
     <div id="tracing-screen" class="screen">
@@ -150,16 +156,23 @@
         </div>
         <div id="jigsaw-area">
             <div class="jigsaw-board" id="jigsaw-board"></div>
-            </div>
+        </div>
         <div id="jigsaw-msg" class="status-msg"></div>
+    </div>
+
+    <div id="settings-modal">
+        <div class="settings-card">
+            <h2 style="color: var(--primary); margin-top: 0;">Settings ⚙️</h2>
+            <p style="font-size: 18px; color: var(--text);">Manage app sounds and voice.</p>
+            <button id="sound-toggle-btn" class="toggle-btn" onclick="toggleSound()">🔊 Sound: ON</button>
+            <button class="toggle-btn close-modal" onclick="closeSettings()">✔️ Done</button>
+        </div>
     </div>
 
     <script src="/kids-learning-app/app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/kids-learning-app/sw.js', { scope: '/kids-learning-app/' })
-            .then(() => console.log("Service Worker Registered Successfully!"))
-            .catch((err) => console.error("Service Worker Failed:", err));
+            navigator.serviceWorker.register('/kids-learning-app/sw.js', { scope: '/kids-learning-app/' });
         }
     </script>
 </body>
