@@ -9,48 +9,68 @@ const ctx = canvas.getContext('2d');
 let completedSections = JSON.parse(localStorage.getItem('completed')) || {};
 let animationFrameId;
 
-// --- GAME DATA ---
+// --- HIGH-FIDELITY TRACING DATA ---
+// Added many more waypoints to curved numbers/letters to ensure perfectly smooth, round tracing paths.
 const traceData = {
-    '1': [ [ {x: 0, y: -100}, {x: 0, y: 100} ] ],
-    '2': [ [ {x: -40, y: -80}, {x: 0, y: -100}, {x: 40, y: -80}, {x: 40, y: -20}, {x: -40, y: 100}, {x: 40, y: 100} ] ],
-    '3': [ [ {x: -40, y: -80}, {x: 0, y: -100}, {x: 40, y: -80}, {x: 40, y: -20}, {x: 0, y: 0} ], [ {x: 0, y: 0}, {x: 40, y: 20}, {x: 40, y: 80}, {x: 0, y: 100}, {x: -40, y: 80} ] ],
-    'A': [ [ {x: 0, y: -100}, {x: -60, y: 100} ], [ {x: 0, y: -100}, {x: 60, y: 100} ], [ {x: -30, y: 20}, {x: 30, y: 20} ] ],
-    'B': [ [ {x: -40, y: -100}, {x: -40, y: 100} ], [ {x: -40, y: -100}, {x: 20, y: -100}, {x: 40, y: -50}, {x: 20, y: 0}, {x: -40, y: 0} ], [ {x: -40, y: 0}, {x: 30, y: 0}, {x: 50, y: 50}, {x: 30, y: 100}, {x: -40, y: 100} ] ]
+    '1': [ [ {x: 0, y: -90}, {x: 0, y: 90} ] ],
+    '2': [ [ {x: -35, y: -60}, {x: -15, y: -90}, {x: 15, y: -90}, {x: 35, y: -60}, {x: 35, y: -20}, {x: -35, y: 90}, {x: 40, y: 90} ] ],
+    '3': [ [ {x: -35, y: -70}, {x: -15, y: -90}, {x: 15, y: -90}, {x: 35, y: -60}, {x: 15, y: -10}, {x: 0, y: 0} ], [ {x: 0, y: 0}, {x: 25, y: 15}, {x: 35, y: 50}, {x: 15, y: 90}, {x: -15, y: 90}, {x: -35, y: 70} ] ],
+    '4': [ [ {x: -10, y: -90}, {x: -40, y: 20}, {x: 40, y: 20} ], [ {x: 20, y: -40}, {x: 20, y: 90} ] ],
+    '5': [ [ {x: -20, y: -90}, {x: -20, y: -10}, {x: 15, y: -10}, {x: 35, y: 20}, {x: 35, y: 60}, {x: 15, y: 90}, {x: -15, y: 90}, {x: -35, y: 70} ], [ {x: -20, y: -90}, {x: 35, y: -90} ] ],
+    '6': [ [ {x: 30, y: -80}, {x: -10, y: -30}, {x: -35, y: 20}, {x: -35, y: 60}, {x: -15, y: 90}, {x: 15, y: 90}, {x: 35, y: 60}, {x: 35, y: 20}, {x: 15, y: -10}, {x: -15, y: -10} ] ],
+    '7': [ [ {x: -35, y: -90}, {x: 35, y: -90}, {x: -15, y: 90} ] ],
+    '8': [ [ {x: 0, y: -90}, {x: -30, y: -60}, {x: -30, y: -30}, {x: 0, y: 0}, {x: 30, y: 30}, {x: 30, y: 60}, {x: 0, y: 90}, {x: -30, y: 60}, {x: -30, y: 30}, {x: 0, y: 0}, {x: 30, y: -30}, {x: 30, y: -60}, {x: 0, y: -90} ] ],
+    '9': [ [ {x: 30, y: 20}, {x: 30, y: -30}, {x: 15, y: -80}, {x: -15, y: -80}, {x: -30, y: -40}, {x: -15, y: 0}, {x: 15, y: 0}, {x: 30, y: -30}, {x: 30, y: 90} ] ],
+    '10': [ [ {x: -40, y: -90}, {x: -40, y: 90} ], [ {x: 35, y: -90}, {x: 15, y: -90}, {x: -5, y: -40}, {x: -5, y: 40}, {x: 15, y: 90}, {x: 35, y: 90}, {x: 55, y: 40}, {x: 55, y: -40}, {x: 35, y: -90} ] ],
+    'A': [ [ {x: 0, y: -90}, {x: -50, y: 90} ], [ {x: 0, y: -90}, {x: 50, y: 90} ], [ {x: -25, y: 20}, {x: 25, y: 20} ] ],
+    'B': [ [ {x: -35, y: -90}, {x: -35, y: 90} ], [ {x: -35, y: -90}, {x: 15, y: -90}, {x: 35, y: -50}, {x: 15, y: -10}, {x: -35, y: -10} ], [ {x: -35, y: -10}, {x: 25, y: -10}, {x: 45, y: 40}, {x: 25, y: 90}, {x: -35, y: 90} ] ],
+    'C': [ [ {x: 35, y: -70}, {x: 15, y: -90}, {x: -15, y: -90}, {x: -35, y: -50}, {x: -35, y: 50}, {x: -15, y: 90}, {x: 15, y: 90}, {x: 35, y: 70} ] ],
+    'D': [ [ {x: -35, y: -90}, {x: -35, y: 90} ], [ {x: -35, y: -90}, {x: 15, y: -90}, {x: 45, y: -40}, {x: 45, y: 40}, {x: 15, y: 90}, {x: -35, y: 90} ] ],
+    'E': [ [ {x: -35, y: -90}, {x: -35, y: 90} ], [ {x: -35, y: -90}, {x: 30, y: -90} ], [ {x: -35, y: 0}, {x: 20, y: 0} ], [ {x: -35, y: 90}, {x: 30, y: 90} ] ],
+    'F': [ [ {x: -35, y: -90}, {x: -35, y: 90} ], [ {x: -35, y: -90}, {x: 30, y: -90} ], [ {x: -35, y: 0}, {x: 20, y: 0} ] ],
+    'G': [ [ {x: 35, y: -70}, {x: 15, y: -90}, {x: -15, y: -90}, {x: -35, y: -50}, {x: -35, y: 50}, {x: -15, y: 90}, {x: 15, y: 90}, {x: 35, y: 70}, {x: 35, y: 10} ], [ {x: 35, y: 10}, {x: 0, y: 10} ] ]
 };
 
-// 🌟 NEW: The Jigsaw Images! 
-// These are safe, high-quality cartoon images for the demo.
+// 🌟 EXPANDED & FIXED JIGSAW IMAGES 
 const jigsawImages = [
-    { title: 'Tiger Puzzle', url: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=400&h=400&fit=crop' },
-    { title: 'Panda Puzzle', url: 'https://images.unsplash.com/photo-1564349683136-5c66584e19b2?w=400&h=400&fit=crop' },
-    { title: 'Rabbit Puzzle', url: 'https://images.unsplash.com/photo-1585110396000-c9fd4e4e5030?w=400&h=400&fit=crop' }
+    { title: 'Tiger', url: 'https://images.unsplash.com/photo-1549366021-9f761d450615?w=400&h=400&fit=crop' },
+    { title: 'Panda', url: 'https://images.unsplash.com/photo-1564349683136-5c66584e19b2?w=400&h=400&fit=crop' },
+    { title: 'Rabbit', url: 'https://images.unsplash.com/photo-1585110396000-c9fd4e4e5030?w=400&h=400&fit=crop' },
+    { title: 'Elephant', url: 'https://images.unsplash.com/photo-1557050543-4d5f4e07ef46?w=400&h=400&fit=crop' },
+    { title: 'Lion', url: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=400&h=400&fit=crop' },
+    { title: 'Monkey', url: 'https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?w=400&h=400&fit=crop' }
 ];
 
 const appStructure = [
     {
-        category: "Draw Numbers",
+        category: "Trace Numbers",
         games: [
-            { type: 'trace', title: 'Numbers 1-3', items: ['1', '2', '3'], icon: '🔢' }
+            { type: 'trace', title: 'Numbers 1-5', items: ['1', '2', '3', '4', '5'], icon: '1️⃣' },
+            { type: 'trace', title: 'Numbers 6-10', items: ['6', '7', '8', '9', '10'], icon: '🔟' }
         ]
     },
     {
-        category: "Draw Letters",
+        category: "Trace Letters",
         games: [
-            { type: 'trace', title: 'Letters A & B', items: ['A', 'B'], icon: '✍️' }
+            { type: 'trace', title: 'Letters A-D', items: ['A', 'B', 'C', 'D'], icon: '🅰️' },
+            { type: 'trace', title: 'Letters E-G', items: ['E', 'F', 'G'], icon: '🆎' }
         ]
     },
     {
-        category: "Sorting Games",
+        category: "Sort & Match",
         games: [
             { type: 'sort', title: 'Sort Animals', icon: '🧺' }
         ]
     },
     {
-        category: "Picture Puzzles (New!)",
+        category: "Picture Puzzles",
         games: [
             { type: 'jigsaw', title: 'Tiger', imgIndex: 0, icon: '🐯' },
             { type: 'jigsaw', title: 'Panda', imgIndex: 1, icon: '🐼' },
-            { type: 'jigsaw', title: 'Rabbit', imgIndex: 2, icon: '🐰' }
+            { type: 'jigsaw', title: 'Rabbit', imgIndex: 2, icon: '🐰' },
+            { type: 'jigsaw', title: 'Elephant', imgIndex: 3, icon: '🐘' },
+            { type: 'jigsaw', title: 'Lion', imgIndex: 4, icon: '🦁' },
+            { type: 'jigsaw', title: 'Monkey', imgIndex: 5, icon: '🐵' }
         ]
     }
 ];
@@ -113,7 +133,7 @@ function speak(text) {
 }
 
 // ==========================================
-// 🧩 NEW: TODDLER JIGSAW PUZZLE ENGINE
+// 🧩 TODDLER JIGSAW PUZZLE ENGINE
 // ==========================================
 let jigsawPiecesPlaced = 0;
 
@@ -127,59 +147,34 @@ function startJigsaw() {
     const area = document.getElementById('jigsaw-area');
     const imgObj = jigsawImages[currentGroup.imgIndex];
     
-    // Set the faded background hint
     board.style.backgroundImage = `url('${imgObj.url}')`;
-    
-    // Clear old pieces
     document.querySelectorAll('.jigsaw-piece').forEach(el => el.remove());
     jigsawPiecesPlaced = 0;
 
-    // Create a 2x2 Grid (4 pieces total)
-    // Board is 300x300. Pieces are 150x150.
-    const positions = [
-        { id: 0, x: 0, y: 0 },         // Top Left
-        { id: 1, x: 150, y: 0 },       // Top Right
-        { id: 2, x: 0, y: 150 },       // Bottom Left
-        { id: 3, x: 150, y: 150 }      // Bottom Right
-    ];
+    const positions = [ { id: 0, x: 0, y: 0 }, { id: 1, x: 150, y: 0 }, { id: 2, x: 0, y: 150 }, { id: 3, x: 150, y: 150 } ];
 
     positions.forEach((pos, index) => {
         let piece = document.createElement('div');
         piece.className = 'jigsaw-piece';
         piece.style.backgroundImage = `url('${imgObj.url}')`;
-        
-        // Offset the background so each piece shows a different corner of the image
         piece.style.backgroundPosition = `-${pos.x}px -${pos.y}px`;
-        
-        // Randomly scatter the pieces at the bottom of the screen
         piece.style.left = (Math.random() * 50 + 10) + '%';
         piece.style.top = (Math.random() * 20 + 60) + '%';
         piece.style.animationDelay = `0.${index * 2}s`;
-        
-        // Store the target "snap" coordinates inside the board
         piece.dataset.targetX = pos.x;
         piece.dataset.targetY = pos.y;
         
-        // Touch Drag Logic
-        piece.addEventListener('touchstart', (e) => { 
-            piece.style.transform = "scale(1.1)"; 
-            piece.style.zIndex = "100"; 
-        });
-        
+        piece.addEventListener('touchstart', (e) => { piece.style.transform = "scale(1.1)"; piece.style.zIndex = "100"; });
         piece.addEventListener('touchmove', (e) => {
             e.preventDefault();
             let touch = e.touches[0];
-            // Center the piece on their finger
             piece.style.left = (touch.clientX - 75) + 'px';
             piece.style.top = (touch.clientY - 75) + 'px';
         });
-        
         piece.addEventListener('touchend', (e) => {
-            piece.style.transform = "scale(1)";
-            piece.style.zIndex = "5";
+            piece.style.transform = "scale(1)"; piece.style.zIndex = "5";
             checkJigsawSnap(piece);
         });
-        
         area.appendChild(piece);
     });
 }
@@ -189,41 +184,158 @@ function checkJigsawSnap(piece) {
     const boardRect = board.getBoundingClientRect();
     const pieceRect = piece.getBoundingClientRect();
     
-    // Calculate the piece's position *relative* to the top-left corner of the board
     let relativeX = pieceRect.left - boardRect.left;
     let relativeY = pieceRect.top - boardRect.top;
-    
     let targetX = parseInt(piece.dataset.targetX);
     let targetY = parseInt(piece.dataset.targetY);
     
-    // HUGE Hitbox: If they get within 60 pixels, SNAP it into place!
     if (Math.abs(relativeX - targetX) < 60 && Math.abs(relativeY - targetY) < 60) {
         speak('Snap!');
         piece.style.left = (boardRect.left + targetX) + 'px';
         piece.style.top = (boardRect.top + targetY) + 'px';
-        piece.style.pointerEvents = 'none'; // Lock it so they can't drag it again
-        piece.style.border = "none"; // Remove border to make it look seamless
+        piece.style.pointerEvents = 'none'; 
+        piece.style.border = "none"; 
         piece.classList.add('success-pulse');
-        
         jigsawPiecesPlaced++;
         
         if (jigsawPiecesPlaced === 4) {
             playSuccess();
             speak(currentGroup.title);
             document.getElementById('jigsaw-msg').innerText = "Beautiful! 🌟";
-            
-            setTimeout(() => {
-                showMenu();
-            }, 4000);
+            setTimeout(showMenu, 3500);
         }
-    } else {
-        // If they missed, slightly pop it down
-        piece.style.top = '70%';
-    }
+    } else { piece.style.top = '70%'; }
 }
 
-// --- KEEPING THE OTHER ENGINES SAFE (Minimified for space) ---
-// Sorting Engine
+// ==========================================
+// ✍️ TRACING ENGINE & GHOST ANIMATION
+// ==========================================
+let smoothStrokes=[], currStroke=0, currWP=0, drawn=[], isFinished=false;
+
+function startTracing() { 
+    menuScreen.classList.remove('active-screen'); 
+    tracingScreen.classList.add('active-screen'); 
+    currentItemIndex = 0; 
+    document.getElementById('tracing-title').innerText = currentGroup.title; 
+    canvas.width=canvas.parentElement.clientWidth; 
+    canvas.height=canvas.parentElement.clientHeight; 
+    loadLetter(); 
+}
+
+function loadLetter() { 
+    currStroke=0; currWP=0; drawn=[]; isFinished=false; 
+    document.getElementById('tracing-msg').innerText="Follow the glowing dot!"; 
+    let char = currentGroup.items[currentItemIndex]; 
+    if(traceData[char]) smoothStrokes = interpolateStrokes(traceData[char]); 
+    animateCanvas(); 
+}
+
+function interpolateStrokes(rs) { 
+    let g=[]; 
+    rs.forEach(s=>{ 
+        let ns=[]; 
+        for(let i=0;i<s.length-1;i++){ 
+            let p1=s[i],p2=s[i+1], dist=Math.hypot(p2.x-p1.x,p2.y-p1.y);
+            // Increased dot density for perfectly smooth curves
+            let steps=Math.max(Math.floor(dist/10), 1); 
+            for(let j=0;j<steps;j++) ns.push({x:p1.x+(p2.x-p1.x)*(j/steps), y:p1.y+(p2.y-p1.y)*(j/steps)}); 
+        } 
+        ns.push(s[s.length-1]); 
+        g.push(ns); 
+    }); 
+    return g; 
+}
+
+function animateCanvas() {
+    if(isFinished) return; 
+    ctx.clearRect(0,0,canvas.width,canvas.height); 
+    let char = currentGroup.items[currentItemIndex];
+    
+    // Background Guide Letter
+    ctx.font=`bold ${canvas.height*0.75}px 'Comic Sans MS'`; 
+    ctx.textAlign="center"; ctx.textBaseline="middle"; 
+    ctx.lineCap="round"; ctx.lineJoin="round"; 
+    ctx.lineWidth=45; ctx.strokeStyle="#EAEAEA"; 
+    ctx.strokeText(char,canvas.width/2,canvas.height/2);
+    
+    if(smoothStrokes.length===0) return; 
+    
+    // Filled Paths
+    ctx.strokeStyle="#087E8B"; ctx.lineWidth=55;
+    drawn.forEach(p=>{ 
+        ctx.beginPath(); ctx.moveTo(p[0].x+canvas.width/2,p[0].y+canvas.height/2); 
+        for(let i=1;i<p.length;i++) ctx.lineTo(p[i].x+canvas.width/2,p[i].y+canvas.height/2); 
+        ctx.stroke(); 
+    });
+    
+    if(currStroke < smoothStrokes.length){
+        let aS = smoothStrokes[currStroke]; 
+        
+        // Draw the remaining small breadcrumb dots
+        for(let i=currWP;i<aS.length;i++){ 
+            ctx.beginPath(); ctx.arc(aS[i].x+canvas.width/2,aS[i].y+canvas.height/2,6,0,Math.PI*2); 
+            ctx.fillStyle="#FFCA3A"; ctx.fill(); 
+        }
+        
+        // Draw the Target "Touch Here" Dot
+        let tWP = aS[currWP]; 
+        ctx.beginPath(); ctx.arc(tWP.x+canvas.width/2,tWP.y+canvas.height/2,18+(Math.sin(Date.now()/150)*5),0,Math.PI*2); 
+        ctx.fillStyle="#FF5A5F"; ctx.fill(); 
+        ctx.lineWidth=3; ctx.strokeStyle="white"; ctx.stroke();
+
+        // 🌟 NEW: Draw the "Ghost Guide" Animation
+        // This calculates a white dot that flies from the current finger position to the end of the stroke
+        let remainingDots = aS.length - currWP;
+        if (remainingDots > 5) { // Only show if there is enough line left to draw
+            let progress = (Date.now() % 1500) / 1500; // Loops every 1.5 seconds
+            let animIndex = currWP + Math.floor(progress * remainingDots);
+            if (animIndex < aS.length) {
+                let guideWP = aS[animIndex];
+                ctx.beginPath();
+                ctx.arc(guideWP.x + canvas.width/2, guideWP.y + canvas.height/2, 10, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255, 255, 255, 0.9)"; // Glowing white
+                ctx.shadowColor = "rgba(255, 255, 255, 1)";
+                ctx.shadowBlur = 15;
+                ctx.fill();
+                ctx.shadowBlur = 0; // Reset shadow so it doesn't affect other drawings
+            }
+        }
+    } 
+    animationFrameId = requestAnimationFrame(animateCanvas);
+}
+
+canvas.addEventListener('touchmove', (e) => {
+    if(currStroke>=smoothStrokes.length||isFinished) return; 
+    e.preventDefault(); 
+    let t=e.touches[0], r=canvas.getBoundingClientRect();
+    let d=Math.sqrt(Math.pow((t.clientX-r.left-canvas.width/2)-smoothStrokes[currStroke][currWP].x,2) + Math.pow((t.clientY-r.top-canvas.height/2)-smoothStrokes[currStroke][currWP].y,2));
+    
+    // Smooth Hitbox
+    if(d<55){ 
+        currWP++; 
+        if(currWP>=smoothStrokes[currStroke].length){ 
+            drawn.push(smoothStrokes[currStroke]); 
+            currStroke++; 
+            currWP=0; 
+            if(currStroke>=smoothStrokes.length){
+                isFinished=true; 
+                cancelAnimationFrame(animationFrameId); 
+                ctx.clearRect(0,0,canvas.width,canvas.height); 
+                ctx.fillStyle="#087E8B"; 
+                ctx.fillText(currentGroup.items[currentItemIndex],canvas.width/2,canvas.height/2);
+                playSuccess(); speak(currentGroup.items[currentItemIndex]); 
+                document.getElementById('tracing-msg').innerText="Perfect! 🎉"; 
+                setTimeout(()=>{ 
+                    currentItemIndex++; 
+                    if(currentItemIndex<currentGroup.items.length) loadLetter(); 
+                    else showMenu(); 
+                }, 2500);
+            }
+        }
+    }
+});
+
+// Sorting Game Logic (Kept compact)
 function startSorting() {
     menuScreen.classList.remove('active-screen'); sortingScreen.classList.add('active-screen'); document.getElementById('sorting-msg').innerText = "Match them!";
     const area = document.getElementById('sorting-area'); document.querySelectorAll('.sort-item').forEach(el => el.remove()); let placed = 0;
@@ -245,28 +357,5 @@ function startSorting() {
         }); area.appendChild(el);
     });
 }
-// Tracing Engine (Uses the thick paintbrush updates from before!)
-let smoothStrokes=[], currStroke=0, currWP=0, drawn=[], isFinished=false;
-function startTracing() { menuScreen.classList.remove('active-screen'); tracingScreen.classList.add('active-screen'); currentItemIndex = 0; document.getElementById('tracing-title').innerText = currentGroup.title; canvas.width=canvas.parentElement.clientWidth; canvas.height=canvas.parentElement.clientHeight; loadLetter(); }
-function loadLetter() { currStroke=0; currWP=0; drawn=[]; isFinished=false; document.getElementById('tracing-msg').innerText="Trace it!"; let char = currentGroup.items[currentItemIndex]; if(traceData[char]) smoothStrokes = interpolateStrokes(traceData[char]); animateCanvas(); }
-function interpolateStrokes(rs) { let g=[]; rs.forEach(s=>{ let ns=[]; for(let i=0;i<s.length-1;i++){ let p1=s[i],p2=s[i+1], dist=Math.hypot(p2.x-p1.x,p2.y-p1.y), steps=Math.max(Math.floor(dist/12),1); for(let j=0;j<steps;j++) ns.push({x:p1.x+(p2.x-p1.x)*(j/steps), y:p1.y+(p2.y-p1.y)*(j/steps)}); } ns.push(s[s.length-1]); g.push(ns); }); return g; }
-function animateCanvas() {
-    if(isFinished) return; ctx.clearRect(0,0,canvas.width,canvas.height); let char = currentGroup.items[currentItemIndex];
-    ctx.font=`bold ${canvas.height*0.7}px 'Comic Sans MS'`; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.lineCap="round"; ctx.lineJoin="round"; ctx.lineWidth=45; ctx.strokeStyle="#EAEAEA"; ctx.strokeText(char,canvas.width/2,canvas.height/2);
-    if(smoothStrokes.length===0) return; ctx.strokeStyle="#087E8B"; ctx.lineWidth=55;
-    drawn.forEach(p=>{ ctx.beginPath(); ctx.moveTo(p[0].x+canvas.width/2,p[0].y+canvas.height/2); for(let i=1;i<p.length;i++) ctx.lineTo(p[i].x+canvas.width/2,p[i].y+canvas.height/2); ctx.stroke(); });
-    if(currStroke<smoothStrokes.length){
-        let aS=smoothStrokes[currStroke]; for(let i=currWP;i<aS.length;i++){ ctx.beginPath(); ctx.arc(aS[i].x+canvas.width/2,aS[i].y+canvas.height/2,6,0,Math.PI*2); ctx.fillStyle="#FFCA3A"; ctx.fill(); }
-        let tWP=aS[currWP]; ctx.beginPath(); ctx.arc(tWP.x+canvas.width/2,tWP.y+canvas.height/2,18+(Math.sin(Date.now()/150)*5),0,Math.PI*2); ctx.fillStyle="#FF5A5F"; ctx.fill(); ctx.lineWidth=3; ctx.strokeStyle="white"; ctx.stroke();
-    } animationFrameId = requestAnimationFrame(animateCanvas);
-}
-canvas.addEventListener('touchmove', (e) => {
-    if(currStroke>=smoothStrokes.length||isFinished) return; e.preventDefault(); let t=e.touches[0], r=canvas.getBoundingClientRect();
-    let d=Math.sqrt(Math.pow((t.clientX-r.left-canvas.width/2)-smoothStrokes[currStroke][currWP].x,2) + Math.pow((t.clientY-r.top-canvas.height/2)-smoothStrokes[currStroke][currWP].y,2));
-    if(d<55){ currWP++; if(currWP>=smoothStrokes[currStroke].length){ drawn.push(smoothStrokes[currStroke]); currStroke++; currWP=0; if(currStroke>=smoothStrokes.length){
-        isFinished=true; cancelAnimationFrame(animationFrameId); ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#087E8B"; ctx.fillText(char,canvas.width/2,canvas.height/2);
-        playSuccess(); speak(char); document.getElementById('tracing-msg').innerText="Perfect! 🎉"; setTimeout(()=>{ currentItemIndex++; if(currentItemIndex<currentGroup.items.length) loadLetter(); else showMenu(); }, 2500);
-    }}}
-});
 
 buildMenu();
