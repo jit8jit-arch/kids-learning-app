@@ -96,7 +96,9 @@ function interpolateStrokes(rawStrokes) {
             let p1 = stroke[i];
             let p2 = stroke[i+1];
             let dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
-            let steps = Math.max(Math.floor(dist / 25), 1); 
+            // INCREASING DENSITY: Changed division from 25 to 12. 
+            // This creates twice as many dots for ultra-smooth curves.
+            let steps = Math.max(Math.floor(dist / 12), 1); 
             for(let j = 0; j < steps; j++) {
                 newStroke.push({ x: p1.x + (p2.x - p1.x) * (j/steps), y: p1.y + (p2.y - p1.y) * (j/steps) });
             }
@@ -139,19 +141,25 @@ function animateCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const char = currentGroup.items[currentItemIndex];
     
+    // Background Guide Letter
     ctx.font = `bold ${canvas.height * 0.7}px 'Comic Sans MS'`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.lineWidth = 40;
-    ctx.strokeStyle = "#EAEAEA";
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    
+    // Set background thickness
+    ctx.lineWidth = 45; 
+    ctx.strokeStyle = "#EAEAEA";
     ctx.strokeText(char, canvas.width/2, canvas.height/2);
 
     if (smoothStrokes.length === 0) return;
 
+    // ACTIVE DRAWING BRUSH
     ctx.strokeStyle = "#087E8B";
-    ctx.lineWidth = 30;
+    // INCREASED THICKNESS: Set to 55 to completely overfill and hide the grey background
+    ctx.lineWidth = 55; 
+    
     drawnPaths.forEach(path => {
         ctx.beginPath();
         ctx.moveTo(path[0].x + canvas.width/2, path[0].y + canvas.height/2);
@@ -164,7 +172,7 @@ function animateCanvas() {
         
         for(let i = currentWaypointIndex; i < activeStroke.length; i++) {
             ctx.beginPath();
-            ctx.arc(activeStroke[i].x + canvas.width/2, activeStroke[i].y + canvas.height/2, 8, 0, Math.PI*2);
+            ctx.arc(activeStroke[i].x + canvas.width/2, activeStroke[i].y + canvas.height/2, 6, 0, Math.PI*2);
             ctx.fillStyle = "#FFCA3A"; 
             ctx.fill();
         }
@@ -173,7 +181,7 @@ function animateCanvas() {
         let pulse = Math.sin(Date.now() / 150) * 5; 
         
         ctx.beginPath();
-        ctx.arc(targetWP.x + canvas.width/2, targetWP.y + canvas.height/2, 20 + pulse, 0, Math.PI*2);
+        ctx.arc(targetWP.x + canvas.width/2, targetWP.y + canvas.height/2, 18 + pulse, 0, Math.PI*2);
         ctx.fillStyle = "#FF5A5F";
         ctx.fill();
         ctx.lineWidth = 3;
@@ -198,7 +206,8 @@ function checkWaypoint(touch) {
     let targetWP = smoothStrokes[currentStrokeIndex][currentWaypointIndex];
     let dist = Math.sqrt(Math.pow(touchX - targetWP.x, 2) + Math.pow(touchY - targetWP.y, 2));
     
-    if (dist < 45) { 
+    // Increased Hitbox slightly so it feels smoother when dragging fast
+    if (dist < 55) { 
         currentWaypointIndex++;
         if (currentWaypointIndex >= smoothStrokes[currentStrokeIndex].length) {
             drawnPaths.push(smoothStrokes[currentStrokeIndex]);
@@ -237,7 +246,6 @@ function letterCompleted(char) {
 }
 
 // --- MEGA PUZZLE LOGIC ---
-// Expanded Master Pool of Items
 const fullPuzzlePool = [
     { emoji: '🍎', type: 'fruit' }, { emoji: '🍌', type: 'fruit' }, { emoji: '🍇', type: 'fruit' },
     { emoji: '🍓', type: 'fruit' }, { emoji: '🍉', type: 'fruit' }, { emoji: '🍒', type: 'fruit' },
@@ -248,7 +256,7 @@ const fullPuzzlePool = [
 ];
 
 let itemsPlaced = 0;
-let totalItemsThisRound = 8; // We will randomly pick 8 items each game
+let totalItemsThisRound = 8; 
 
 function startSorting() {
     menuScreen.classList.remove('active-screen');
@@ -259,7 +267,6 @@ function startSorting() {
     document.querySelectorAll('.draggable').forEach(el => el.remove());
     itemsPlaced = 0;
 
-    // Shuffle the master pool and pick the first 8
     let shuffledPool = fullPuzzlePool.sort(() => 0.5 - Math.random());
     let activeItems = shuffledPool.slice(0, totalItemsThisRound);
 
@@ -269,16 +276,14 @@ function startSorting() {
         el.innerText = item.emoji;
         el.dataset.type = item.type;
         
-        // Spread them out randomly in the lower section
         el.style.left = (Math.random() * 70 + 10) + '%';
         el.style.top = (Math.random() * 40 + 45) + '%';
-        // Stagger the pop-in animation slightly for each item
         el.style.animationDelay = `0.${index}s, ${Math.random()}s`; 
         
         el.addEventListener('touchstart', (e) => { 
             el.style.transform = "scale(1.4)"; 
-            el.style.animation = "none"; // Stop floating when grabbed
-            el.style.zIndex = "100"; // Bring to front
+            el.style.animation = "none"; 
+            el.style.zIndex = "100"; 
         });
         
         el.addEventListener('touchmove', (e) => {
@@ -308,12 +313,9 @@ function checkDrop(el, touch) {
 
     if ((targetType === 'fruit' && droppedInFruits) || (targetType === 'animal' && droppedInAnimals)) {
         speak(targetType === 'fruit' ? 'Yummy!' : 'Wow!');
-        el.style.pointerEvents = 'none'; // Lock it
-        
-        // Add the golden pulse success animation!
+        el.style.pointerEvents = 'none'; 
         el.classList.add('success-pulse');
         
-        // Snap near center of the basket randomly so they pile up nicely
         let targetZone = targetType === 'fruit' ? fruitsZone : animalsZone;
         el.style.left = (targetZone.left + targetZone.width/2 - 30 + (Math.random()*20-10)) + 'px';
         el.style.top = (targetZone.top + targetZone.height/2 - 30 + (Math.random()*20-10)) + 'px';
@@ -329,7 +331,6 @@ function checkDrop(el, touch) {
         }
     } else {
         speak('Try again!');
-        // Restart the floating animation if they miss
         el.style.animation = "float 3s ease-in-out infinite"; 
     }
 }
