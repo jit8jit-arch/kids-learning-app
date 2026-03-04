@@ -1,11 +1,11 @@
-const CACHE_NAME = 'kids-tracer-v2';
+const CACHE_NAME = 'kids-tracer-v3';
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './app.js',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+  '/kids-learning-app/',
+  '/kids-learning-app/index.html',
+  '/kids-learning-app/app.js',
+  '/kids-learning-app/manifest.json',
+  '/kids-learning-app/icon-192.png',
+  '/kids-learning-app/icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
@@ -20,7 +20,6 @@ self.addEventListener('fetch', (e) => {
     );
 });
 
-// Clear out the old, broken caches
 self.addEventListener('activate', (e) => {
     e.waitUntil(
         caches.keys().then((keyList) => {
