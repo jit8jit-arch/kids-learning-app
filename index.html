@@ -44,7 +44,7 @@
         /* Mega Menu Hub */
         h1 { color: var(--primary); text-shadow: 3px 3px 0px #fff, 0 5px 10px rgba(255,90,95,0.2); font-size: 38px; text-align: center; margin: 20px 0 10px 0; line-height: 1.1; }
         .menu-container { width: 95%; max-width: 500px; height: 80vh; overflow-y: auto; padding-bottom: 40px; }
-        .menu-container::-webkit-scrollbar { display: none; } /* Hide scrollbar for clean UI */
+        .menu-container::-webkit-scrollbar { display: none; }
         
         .category-title { font-size: 22px; color: var(--secondary); margin-top: 25px; margin-bottom: 15px; padding-left: 10px; border-left: 6px solid var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 1px;}
         
@@ -68,10 +68,10 @@
         }
         canvas { width: 100%; height: 100%; display: block; touch-action: none; }
         
-        #sorting-area, #jigsaw-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; }
-        .drop-zones { display: flex; justify-content: space-around; width: 95%; height: 35%; margin-top: 20px; gap: 10px; }
+        #sorting-area, #jigsaw-area, #worksheet-area { flex: 1; width: 100%; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         
         /* Dynamic Baskets */
+        .drop-zones { display: flex; justify-content: space-around; width: 95%; height: 35%; margin-top: 20px; gap: 10px; }
         .zone {
             flex: 1; border-radius: 30px; border: 6px dashed rgba(255,255,255,0.8); display: flex; flex-direction: column; 
             align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: white;
@@ -79,11 +79,9 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3); text-align: center; line-height: 1.2;
         }
         
-        .sort-item {
-            position: absolute; font-size: 55px; cursor: grab; padding: 10px;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); transition: transform 0.1s;
-        }
+        .sort-item { position: absolute; font-size: 55px; cursor: grab; padding: 10px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); transition: transform 0.1s; }
         
+        /* Jigsaw */
         .jigsaw-board {
             width: 320px; height: 320px; background-color: rgba(255,255,255,0.7); border: 8px solid var(--secondary);
             border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.2), 0 10px 30px rgba(0,0,0,0.1); position: relative;
@@ -91,9 +89,29 @@
         }
         .jigsaw-piece {
             position: absolute; width: 160px; height: 160px; background-size: 320px 320px;
-            border-radius: 12px; box-shadow: 0 12px 20px rgba(0,0,0,0.4); border: 4px solid white;
-            cursor: grab; transition: transform 0.1s; z-index: 5;
+            border-radius: 12px; box-shadow: 0 12px 20px rgba(0,0,0,0.4); border: 4px solid white; cursor: grab; transition: transform 0.1s; z-index: 5;
         }
+
+        /* 📝 NEW: Colorful Worksheets */
+        #worksheet-paper {
+            background: white; width: 90%; max-width: 400px; height: 50%; border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); border: 6px solid var(--secondary);
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; padding: 20px; gap: 15px;
+            background-image: repeating-linear-gradient(transparent, transparent 49px, #e5e5e5 50px);
+        }
+        .worksheet-emoji {
+            font-size: 60px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        #worksheet-answers {
+            display: flex; gap: 20px; margin-top: 30px; width: 90%; max-width: 400px; justify-content: center;
+        }
+        .answer-btn {
+            background: var(--primary); color: white; font-size: 40px; font-weight: bold; font-family: 'Comic Sans MS';
+            border: 5px solid white; border-radius: 20px; width: 80px; height: 80px;
+            box-shadow: 0 8px 0 #C43B40, 0 15px 20px rgba(0,0,0,0.2); cursor: pointer; transition: transform 0.1s;
+        }
+        .answer-btn:active { transform: translateY(8px); box-shadow: 0 0px 0 #C43B40; }
         
         .status-msg { font-size: 30px; font-weight: 900; color: var(--primary); margin-top: 20px; text-shadow: 2px 2px 0 #fff, 0 4px 10px rgba(0,0,0,0.1); text-align: center;}
         
@@ -143,8 +161,7 @@
             <button class="icon-btn" onclick="startSorting()">🔄</button>
         </div>
         <div id="sorting-area">
-            <div class="drop-zones" id="dynamic-drop-zones">
-                </div>
+            <div class="drop-zones" id="dynamic-drop-zones"></div>
         </div>
         <div id="sorting-msg" class="status-msg"></div>
     </div>
@@ -159,6 +176,21 @@
             <div class="jigsaw-board" id="jigsaw-board"></div>
         </div>
         <div id="jigsaw-msg" class="status-msg"></div>
+    </div>
+
+    <div id="worksheet-screen" class="screen">
+        <div class="header">
+            <button class="icon-btn" onclick="showMenu()">🏠</button>
+            <span id="worksheet-title">Worksheet</span>
+            <button class="icon-btn" onclick="startWorksheet()">🔄</button>
+        </div>
+        <div id="worksheet-area">
+            <div id="worksheet-paper">
+                </div>
+            <div id="worksheet-answers">
+                </div>
+        </div>
+        <div id="worksheet-msg" class="status-msg"></div>
     </div>
 
     <div id="settings-modal">
